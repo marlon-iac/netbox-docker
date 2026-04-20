@@ -13,12 +13,6 @@ NETBOX_PORT=8000
 IP_ADDR=$(hostname -I | awk '{print $1}')
 
 # ==============================
-# INSTALL DEPENDENCIES
-# ==============================
-apt-get update -y
-apt-get install -y ca-certificates curl git
-
-# ==============================
 # VALIDATIONS
 # ==============================
 if [ "$EUID" -ne 0 ]; then
@@ -26,30 +20,40 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# ==============================
+# INSTALL DEPENDENCIES
+# ==============================
+apt-get update -y
+apt-get install -y ca-certificates curl git
+
+
+# ==============================
+# INIT SUBMODULE
+# ==============================
+echo "Inicializando submodule..."
 git submodule update --init --recursive
+
+if [ ! -f "${NETBOX_DIR}/docker-compose.yml" ]; then
+  echo "Erro: submodule netbox não inicializado corretamente"
+  exit 1
+fi
 
 if [ ! -f "${OVERRIDE_FILE}" ]; then
   echo "Override não encontrado!"
   exit 1
 fi
 
-cd "${NETBOX_DIR}"
+# ==============================
+# INSTALL DOCKER (SE NÃO EXISTIR)
+# ==============================
+if ! command -v docker &> /dev/null; then
+  echo "Instalando Docker..."
 
-echo "Aplicando override..."
-cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  chmod a+r /etc/apt/keyrings/docker.asc
 
-# ==============================
-# REMOVE DOCKER (OFICIAL)
-# ==============================
-apt remove $(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc podman-docker containerd runc | cut -f1) -y
-
-# ==============================
-# SETUP DOCKER (OFICIAL)
-# ==============================
-install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-chmod a+r /etc/apt/keyrings/docker.asc
-tee /etc/apt/sources.list.d/docker.sources <<EOF
+  tee /etc/apt/sources.list.d/docker.sources > /dev/null <<EOF
 Types: deb
 URIs: https://download.docker.com/linux/ubuntu
 Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
@@ -58,25 +62,9 @@ Architectures: $(dpkg --print-architecture)
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
 
-# ==============================
-# INSTALL DOCKER (OFICIAL)
-# ==============================
-apt-get update -y
-apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-# Inicialização do docker
-systemctl enable --now docker
-
-tee /etc/apt/sources.list.d/docker.sources > /dev/null <<EOF
-Types: deb
-URIs: https://download.docker.com/linux/ubuntu
-Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
-Components: stable
-Architectures: $(dpkg --print-architecture)
-Signed-By: /etc/apt/keyrings/docker.asc
-EOF
-
-apt-get update -y
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  apt-get update -y
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+fi
 
 systemctl enable --now docker
 
@@ -84,6 +72,10 @@ systemctl enable --now docker
 # DEPLOY NETBOX
 # ==============================
 cd "${NETBOX_DIR}"
+
+echo "Aplicando override..."
+cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
+
 echo "Baixando imagens..."
 docker compose pull
 
@@ -111,7 +103,7 @@ After=docker.service
 
 [Service]
 Type=oneshot
-WorkingDirectory=${NETBOX_DIR}/netbox-docker
+WorkingDirectory=${NETBOX_DIR}
 ExecStart=/usr/bin/docker compose up -d
 ExecStop=/usr/bin/docker compose down
 RemainAfterExit=yes
@@ -135,7 +127,7 @@ echo ""
 echo "Acesse: http://${IP_ADDR}:${NETBOX_PORT}"
 echo ""
 echo "Criar usuário admin:"
-echo "cd ${NETBOX_DIR}/netbox-docker"
+echo "cd ${NETBOX_DIR}"
 echo "docker compose exec netbox /opt/netbox/netbox/manage.py createsuperuser"
 echo ""
 echo "=================================================="
