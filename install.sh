@@ -93,6 +93,32 @@ until curl -s http://localhost:${NETBOX_PORT} >/dev/null; do
 done
 
 # ==============================
+# CREATE SUPERUSER
+# ==============================
+echo "Criando superuser automaticamente..."
+
+NETBOX_ADMIN_USER=${NETBOX_ADMIN_USER:-admin}
+NETBOX_ADMIN_PASSWORD=${NETBOX_ADMIN_PASSWORD:-Admin@1234567890}
+NETBOX_ADMIN_EMAIL=${NETBOX_ADMIN_EMAIL:-admin@example.com}
+
+docker compose exec -T netbox python3 /opt/netbox/netbox/manage.py shell <<EOF
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+username = "${NETBOX_ADMIN_USER}"
+email = "${NETBOX_ADMIN_EMAIL}"
+password = "${NETBOX_ADMIN_PASSWORD}"
+
+if not User.objects.filter(username=username).exists():
+    User.objects.create_superuser(username, email, password)
+    print("Superuser criado com sucesso")
+else:
+    print("Superuser já existe")
+EOF
+
+
+# ==============================
 # SYSTEMD SERVICE
 # ==============================
 cat <<EOF > /etc/systemd/system/netbox.service
@@ -129,5 +155,9 @@ echo ""
 echo "Criar usuário admin:"
 echo "cd ${NETBOX_DIR}"
 echo "docker compose exec netbox /opt/netbox/netbox/manage.py createsuperuser"
+echo ""
+echo "⚠️  IMPORTANTE: altere a senha do usuário admin no primeiro login!"
+echo "Usuário: ${NETBOX_ADMIN_USER}"
+echo "Senha: ${NETBOX_ADMIN_PASSWORD}"
 echo ""
 echo "=================================================="
