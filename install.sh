@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 # ==============================
@@ -9,6 +9,7 @@ export DEBIAN_FRONTEND=noninteractive
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 NETBOX_DIR="${BASE_DIR}/netbox-docker"
 NETBOX_PORT=8000
+IP_ADDR=$(hostname -I | awk '{print $1}')
 
 # ==============================
 # VALIDATIONS
@@ -72,10 +73,7 @@ systemctl enable --now docker
 # ==============================
 # DEPLOY NETBOX
 # ==============================
-cd "$NETBOX_DIR"
-
-echo "Aplicando customizações..."
-cp -fv "${CUSTOM_DIR}/docker-compose.override.yml" "${NETBOX_DIR}/docker-compose.override.yml"
+cd ${NETBOX_DIR}/netbox-docker
 
 echo "Baixando imagens..."
 docker compose pull
@@ -119,8 +117,6 @@ systemctl enable netbox
 # ==============================
 # INFO FINAL
 # ==============================
-IP_ADDR=$(hostname -I | awk '{print $1}')
-
 echo "=================================================="
 echo "✅ NetBox instalado com sucesso!"
 echo "=================================================="
@@ -130,6 +126,7 @@ echo ""
 echo "Acesse: http://${IP_ADDR}:${NETBOX_PORT}"
 echo ""
 echo "Criar usuário admin:"
+echo "cd ${NETBOX_DIR}/netbox-docker"
 echo "docker compose exec netbox /opt/netbox/netbox/manage.py createsuperuser"
 echo ""
 echo "=================================================="
