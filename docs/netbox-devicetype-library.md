@@ -4,3 +4,4 @@ Referencias:
 
 - https://deepwiki.com/netbox-community/devicetype-library
 - https://github.com/netbox-community/devicetype-library
+- https://github.com/netbox-community/Device-Type-Library-Import
