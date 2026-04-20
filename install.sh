@@ -70,7 +70,7 @@ systemctl enable --now docker
 # ==============================
 # DEPLOY NETBOX
 # ==============================
-cd "${NETBOX_DIR}/netbox-docker"
+cd "${NETBOX_DIR}"
 echo "Baixando imagens..."
 docker compose pull
 
