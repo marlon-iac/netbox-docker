@@ -33,8 +33,6 @@ apt remove $(dpkg --get-selections docker.io docker-compose docker-compose-v2 do
 # ==============================
 # SETUP DOCKER (OFICIAL)
 # ==============================
-apt-get update -y
-apt install ca-certificates curl -y
 install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 chmod a+r /etc/apt/keyrings/docker.asc
@@ -55,7 +53,6 @@ apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-co
 # Inicialização do docker
 systemctl enable --now docker
 
-
 tee /etc/apt/sources.list.d/docker.sources > /dev/null <<EOF
 Types: deb
 URIs: https://download.docker.com/linux/ubuntu
@@ -73,8 +70,7 @@ systemctl enable --now docker
 # ==============================
 # DEPLOY NETBOX
 # ==============================
-cd ${NETBOX_DIR}/netbox-docker
-
+cd "${NETBOX_DIR}/netbox-docker"
 echo "Baixando imagens..."
 docker compose pull
 
@@ -102,7 +98,7 @@ After=docker.service
 
 [Service]
 Type=oneshot
-WorkingDirectory=${NETBOX_DIR}
+WorkingDirectory=${NETBOX_DIR}/netbox-docker
 ExecStart=/usr/bin/docker compose up -d
 ExecStop=/usr/bin/docker compose down
 RemainAfterExit=yes
