@@ -27,12 +27,12 @@ O processo é automatizado através de um script de instalação. Siga os passos
 
     ```bash
     git clone https://github.com/marlon-iac/netbox-docker.git
-    cd netbox-docker
     ```
 
 2. **Execute o script de instalação:**
 
     ```bash
+    cd netbox-docker
     sudo ./install.sh
     ```
 
@@ -71,7 +71,8 @@ Após o término da instalação, o NetBox estará disponível em:
 
 Para guias mais avançados, consulte os arquivos na pasta `docs/`:
 
-- [Guia de Upgrade](docs/netbox-update.md) - Como gerenciar versões fixas.
-- [Guia de Backup](docs/netbox-backup.md) - Como fazer backup.
-- [Guia de Plugins](docs/netbox-plugins.md) - Como estender as funcionalidades.
-- [API REST](docs/netbox-rest_api.md) - Como integrar com outras ferramentas.
+- [Guia de Upgrade](docs/upgrading.md) - Como fazer upgrade.
+
+## Referencias
+
+- [netbox-docker-wiki](https://github.com/netbox-community/netbox-docker/wiki/)
