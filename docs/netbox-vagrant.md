@@ -1,1 +1,0 @@
-documentar aqui sobre o script no vagrant
