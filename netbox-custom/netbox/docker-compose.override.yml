@@ -10,5 +10,3 @@ services:
       retries: 5
   netbox-worker:
     image: netboxcommunity/netbox:v4.5.8-4.0.2
-  netbox-housekeeping:
-    image: netboxcommunity/netbox:v4.5.8-4.0.2
