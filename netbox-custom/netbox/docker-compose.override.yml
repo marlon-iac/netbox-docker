@@ -1,0 +1,9 @@
+services:
+  netbox:
+    ports:
+      - "8000:8080"
+    healthcheck:
+      start_period: 400s
+      timeout: 30s
+      interval: 30s
+      retries: 5
