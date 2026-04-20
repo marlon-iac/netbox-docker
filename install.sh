@@ -7,9 +7,16 @@ set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
-NETBOX_DIR="${BASE_DIR}/netbox-docker"
+NETBOX_DIR="${BASE_DIR}/netbox"
+OVERRIDE_FILE="${BASE_DIR}/netbox-custom/docker-compose.override.yml"
 NETBOX_PORT=8000
 IP_ADDR=$(hostname -I | awk '{print $1}')
+
+# ==============================
+# INSTALL DEPENDENCIES
+# ==============================
+apt-get update -y
+apt-get install -y ca-certificates curl git
 
 # ==============================
 # VALIDATIONS
@@ -19,11 +26,17 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# ==============================
-# INSTALL DEPENDENCIES
-# ==============================
-apt-get update -y
-apt-get install -y ca-certificates curl git
+git submodule update --init --recursive
+
+if [ ! -f "${OVERRIDE_FILE}" ]; then
+  echo "Override não encontrado!"
+  exit 1
+fi
+
+cd "${NETBOX_DIR}"
+
+echo "Aplicando override..."
+cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
 
 # ==============================
 # REMOVE DOCKER (OFICIAL)
