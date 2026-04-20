@@ -8,7 +8,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 NETBOX_DIR="${BASE_DIR}/netbox"
-OVERRIDE_FILE="${BASE_DIR}/netbox-custom/docker-compose.override.yml"
+OVERRIDE_FILE="${BASE_DIR}/netbox-custom/netbox/docker-compose.override.yml"
 NETBOX_PORT=8000
 IP_ADDR=$(hostname -I | awk '{print $1}')
 
