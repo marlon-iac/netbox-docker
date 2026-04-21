@@ -9,10 +9,6 @@ services:
       timeout: 30s
       interval: 30s
       retries: 5
-    environment:
-      - SUPERUSER_NAME=${NETBOX_ADMIN_USER:-admin}
-      - SUPERUSER_EMAIL=${NETBOX_ADMIN_EMAIL:-admin@example.com}
-      - SUPERUSER_PASSWORD=${NETBOX_ADMIN_PASSWORD:-Admin@1234567890}
   netbox-worker:
     image: netboxcommunity/netbox:v4.5.8-4.0.2
     restart: unless-stopped
