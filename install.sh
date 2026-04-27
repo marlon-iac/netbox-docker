@@ -6,7 +6,7 @@ set -euo pipefail
 # ==============================
 export DEBIAN_FRONTEND=noninteractive
 
-BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
+BASE_DIR="/opt/netbox-docker"
 NETBOX_DIR="${BASE_DIR}/netbox"
 OVERRIDE_FILE="${BASE_DIR}/netbox-custom/netbox/docker-compose.override.yml"
 NETBOX_PORT=8000
@@ -25,7 +25,6 @@ fi
 # ==============================
 apt-get update -y
 apt-get install -y ca-certificates curl git
-
 
 # ==============================
 # INIT SUBMODULE
@@ -73,6 +72,18 @@ systemctl enable --now docker
 # ==============================
 cd "${NETBOX_DIR}"
 
+# Generate secret key
+SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')
+echo "SECRET_KEY=$SECRET_KEY"
+
+# Create environment file
+cat << EOF > .env
+SUPERUSER_EMAIL=admin@example.com
+SUPERUSER_PASSWORD=admin
+SUPERUSER_API_TOKEN=$(python3 -c 'import secrets; print(secrets.token_hex(20))')
+SECRET_KEY=$SECRET_KEY
+EOF
+
 echo "Aplicando override..."
 cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
 
@@ -97,25 +108,25 @@ done
 # ==============================
 echo "Criando superuser automaticamente..."
 
-NETBOX_ADMIN_USER=${NETBOX_ADMIN_USER:-admin}
-NETBOX_ADMIN_PASSWORD=${NETBOX_ADMIN_PASSWORD:-Admin@1234567890}
-NETBOX_ADMIN_EMAIL=${NETBOX_ADMIN_EMAIL:-admin@example.com}
+# NETBOX_ADMIN_USER=${NETBOX_ADMIN_USER:-admin}
+# NETBOX_ADMIN_PASSWORD=${NETBOX_ADMIN_PASSWORD:-Admin@1234567890}
+# NETBOX_ADMIN_EMAIL=${NETBOX_ADMIN_EMAIL:-admin@example.com}
 
-docker compose exec -T netbox python3 /opt/netbox/netbox/manage.py shell <<EOF
-from django.contrib.auth import get_user_model
+# docker compose exec -T netbox python3 /opt/netbox/netbox/manage.py shell <<EOF
+# from django.contrib.auth import get_user_model
 
-User = get_user_model()
+# User = get_user_model()
 
-username = "${NETBOX_ADMIN_USER}"
-email = "${NETBOX_ADMIN_EMAIL}"
-password = "${NETBOX_ADMIN_PASSWORD}"
+# username = "${NETBOX_ADMIN_USER}"
+# email = "${NETBOX_ADMIN_EMAIL}"
+# password = "${NETBOX_ADMIN_PASSWORD}"
 
-if not User.objects.filter(username=username).exists():
-    User.objects.create_superuser(username, email, password)
-    print("Superuser criado com sucesso")
-else:
-    print("Superuser já existe")
-EOF
+# if not User.objects.filter(username=username).exists():
+#     User.objects.create_superuser(username, email, password)
+#     print("Superuser criado com sucesso")
+# else:
+#     print("Superuser já existe")
+# EOF
 
 
 # ==============================
