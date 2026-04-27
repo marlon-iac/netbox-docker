@@ -1,6 +1,11 @@
 services:
   netbox:
     image: netboxcommunity/netbox:v4.5.8-4.0.2
+    environment:
+      SUPERUSER_NAME: admin
+      SUPERUSER_EMAIL: admin@example.com
+      SUPERUSER_PASSWORD: Admin@1234567890
+      SKIP_SUPERUSER: "false"  # Garante a criação (padrão é false)
     restart: unless-stopped
     ports:
       - "8000:8080"

@@ -72,18 +72,6 @@ systemctl enable --now docker
 # ==============================
 cd "${NETBOX_DIR}"
 
-# Generate secret key
-SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')
-echo "SECRET_KEY=$SECRET_KEY"
-
-# Create environment file
-cat << EOF > .env
-SUPERUSER_EMAIL=admin@example.com
-SUPERUSER_PASSWORD=admin
-SUPERUSER_API_TOKEN=$(python3 -c 'import secrets; print(secrets.token_hex(20))')
-SECRET_KEY=$SECRET_KEY
-EOF
-
 echo "Aplicando override..."
 cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
 
