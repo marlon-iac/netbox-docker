@@ -27,6 +27,7 @@ docker compose up -d
 
 Referencias:
 
+- https://www.youtube.com/watch?v=OGQGly7NIFY
 - https://github.com/netbox-community/netbox-docker/wiki/
 - https://deepwiki.com/netbox-community/netbox-docker
 - https://github.com/netbox-community/netbox-docker

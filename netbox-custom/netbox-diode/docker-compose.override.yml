@@ -1,0 +1,18 @@
+services:
+  netbox:
+    build:
+      context: .
+      dockerfile: Dockerfile-Plugins
+    image: netbox:latest-plugins
+    ports:
+      - "8000:8080"
+    healthcheck:
+      start_period: 400s
+      timeout: 30s
+      interval: 30s
+      retries: 5
+  netbox-worker:
+    image: netbox:latest-plugins
+    build:
+      context: .
+      dockerfile: Dockerfile-Plugins

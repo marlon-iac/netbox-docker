@@ -1,0 +1,48 @@
+orb:
+  config_manager:
+    active: local
+  backends:
+    network_discovery: {} # Ativa o módulo de varredura de rede (nmap)
+    device_discovery: {}   # Ativa o módulo de investigação de dispositivos (NAPALM)
+    common:
+      diode:
+        target: grpc://192.168.249.175:8080/diode  # Endereço do servidor Diode
+        client_id: orb-agent-01ad7fe438d1eff4      # Seu client_id (ATENÇÃO: Segurança!)
+        client_secret: UjA6UXUVwUIi8Qun+Fg+RldpJlqZIIGFn1W4wZPw0Ik= # Seu client_secret (ATENÇÃO: Segurança!)
+        agent_name: orb-agent  # Um nome para este agente
+  policies:
+    network_discovery:
+      mapeamento_das_redes: # Nome sugestivo para a política
+        config:
+          schedule: "* * * * *"  # Executa a cada 1 minuto (bom para testes)
+          timeout: 10
+        scope:
+          targets: # LISTA DE TODAS AS REDES
+            - "192.168.249.0/24"
+
+    device_discovery:
+      cisco_credencials:          # nome sugestivo para a politica
+        config:
+          schedule: "* * * * *"  # Executa a cada 1 minuto (bom para testes)
+          defaults:
+            site: 'orb-agent'
+        scope:
+          # Aqui você NÃO PRECISA listar os IPs!
+          # Basta definir as sub-redes e ranges, e o orb-agent fará o resto.
+          # O driver é OMITIDO de propósito para que o NAPALM tente todos os
+          # drivers disponíveis (ios, junos, nxos, etc.) automaticamente[reference:0].
+          - hostname: "192.168.249.0/24" # Range de IP
+            username: 'cisco'
+            password: 'cisco'          # Aqui você NÃO PRECISA listar os IPs!
+            key: 'credenciais_cisco'
+
+      admin_credencials:
+          config:
+            schedule: "* * * * *"
+            defaults:
+              site: 'orb-agent'
+          scope:
+            - hostname: "192.168.249.0/24"
+              username: 'admin'
+              password: 'admin'
+              key: 'credenciais_admin'
