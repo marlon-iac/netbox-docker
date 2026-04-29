@@ -1,0 +1,8 @@
+services:
+  orb-agent:
+    image: netboxlabs/orb-agent:latest
+    container_name: orb-agent
+    volumes:
+      - /opt/netbox-discovery/orb-agent/agent.yaml:/app/agent.yaml
+    command: run -c /app/agent.yaml
+    restart: unless-stopped

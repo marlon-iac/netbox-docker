@@ -7,9 +7,9 @@ orb:
     common:
       diode:
         target: grpc://192.168.249.175:8080/diode  # Endereço do servidor Diode
-        client_id: orb-agent-01ad7fe438d1eff4      # Seu client_id (ATENÇÃO: Segurança!)
-        client_secret: UjA6UXUVwUIi8Qun+Fg+RldpJlqZIIGFn1W4wZPw0Ik= # Seu client_secret (ATENÇÃO: Segurança!)
-        agent_name: orb-agent  # Um nome para este agente
+        client_id: orb-agent-01ad7fe438d1eff4      # Seu client_id gerado no plugin do diode no netbox
+        client_secret: UjA6UXUVwUIi8Qun+Fg+RldpJlqZIIGFn1W4wZPw0Ik= # Seu client_secret gerado no plugin do diode no netbox
+        agent_name: orb-agent  # O Client name gerado no plugin do diode no netbox
   policies:
     network_discovery:
       mapeamento_das_redes: # Nome sugestivo para a política
