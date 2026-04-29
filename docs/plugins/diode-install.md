@@ -2,14 +2,14 @@ https://chat.deepseek.com/a/chat/s/59395b4b-ce8b-4b2c-9b57-5b898d9bee43
 
 # Sobre
 
-Plugin do netbox para atualização automática de devices na rede. Ele é composto por:
+Plugin do netbox para adicionar de forma automática devices de rede no netbox. Composto por:
 
 - **1. Orb Agent - Discovery Engine**
 
   - Como funciona:
 
     - Executado via docker container
-    - Usa Drivers do Napalm para conectar a multi vendoers
+    - Usa Drivers do Napalm para conectar a multi vendors
     - Conecta aos devices via SSH/SNMP/NETCONF
     - Schedule discovery configurável
     - Envia os dados ao servidor do Diode
@@ -109,7 +109,6 @@ chmod +x quickstart.sh
 
 # Execute o quick-start apontando para url do netbox
 ./quickstart.sh http://<hostname_netbox>:<port_netbox>
-
 ```
 
 Esse script vai:
@@ -144,23 +143,21 @@ O container irá instalar:
 
 ## No netbox-docker
 
-1. Dentro do diretório onde está seu docker-compose.yml do NetBox, crie estes três arquivos:
+O procedimento abaixo é para ser realizado em cenários com netbox-docker.
 
-- plugin_requirements.txt:
+1. Dentro do diretório onde está seu docker-compose.yml do NetBox Docker, copie estes três arquivos:
 
-```text
-netboxlabs-diode-netbox-plugin
+- [plugin_requirements.txt](../../netbox-custom/netbox-diode/plugin_requirements.txt)
+- [Dockerfile-Plugins](../../netbox-custom/netbox-diode/Dockerfile-Plugins)
+- [docker-compose.override.yml](../../netbox-custom/netbox-diode/docker-compose.override.yml)
+
+```bash
+cp /opt/netbox-docker/netbox-custom/netbox-diode/plugin_requirements.txt /opt/netbox-docker/netbox
+cp /opt/netbox-docker/netbox-custom/netbox-diode/Dockerfile-Plugins /opt/netbox-docker/netbox
+cp /opt/netbox-docker/netbox-custom/netbox-diode/docker-compose.override.yml /opt/netbox-docker/netbox
 ```
 
-- Dockerfile-Plugins:
-
-```dockerfile
-FROM netboxcommunity/netbox:v4.5.8-4.0.2
-COPY ./plugin_requirements.txt /opt/netbox/
-RUN /usr/local/bin/uv pip install -r /opt/netbox/plugin_requirements.txt
-```
-
-- docker-compose.override.yml: (Junte com o que você já tem)
+*obs: caso já possua um `docker-compose.override.yml` de instalação do netbox-docker, apenas acrescente as linhas abaixo para instalação dos plugins ao invés de copiar o arquivo:*
 
 ```yaml
 services:
@@ -168,161 +165,77 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-Plugins
-    image: netbox:latest-plugins
-    ports:
-      - "8000:8080"
-    healthcheck:
-      start_period: 400s
-      timeout: 30s
-      interval: 30s
-      retries: 5
+    image: netbox-with-diode:latest
   netbox-worker:
-    image: netbox:latest-plugins
+    image: netbox-with-diode:latest
     build:
       context: .
       dockerfile: Dockerfile-Plugins
 ```
 
-2. Configurar o plugin
+2. Configuração do arquivo de plugin
 
-- Configurar o arquivo de plugins do Netbox para adicionar o plugin e as credenciais de `client_secret` e `client_id` gerados em `client-credentials.json` no diretório do diode server do passo anterior
+Configurar o arquivo de plugins do Netbox para adicionar o plugin e as credenciais de `client_secret` e `client_id` gerados em `client-credentials.json` (/opt/netbox-discovery/diode/oauth2/client/client-credentials.json) conforme passos anteriores.
 
 ```bash
-nano configuration/plugins.py
+# obtenha as credenciais diode-to-netbox
+cat /opt/netbox-discovery/diode/oauth2/client/client-credentials.json | grep -A 3 "netbox-to-diode"
+# copie o arquivo de plugins para o diretório do netbox-docker
+cp /opt/netbox-docker/netbox-custom/netbox-diode/configuration/plugins.py /opt/netbox-docker/netbox/configuration/plugins.py
+# abra o arquivo de plugins e configure as credenciais e o grpc do diode
+nano /opt/netbox-docker/netbox/configuration/plugins.py
 ```
 
-```python
-PLUGINS = [
-    "netbox_diode_plugin",
-]
+**Exemplo:**
 
+```python
+# restante omitido
 PLUGINS_CONFIG = {
     "netbox_diode_plugin": {
-        "diode_target_override": "grpc://<192.168.249.175>:8080/diode",
-        "client_id": "<YOUR_CLIENT_ID>",
-        "netbox_to_diode_client_secret": "<YOUR_CLIENT_SECRET>"
+        "diode_target_override": "grpc://192.168.249.175:8000/diode",
+        "diode_username": "diode",
+        "client_id": "netbox-to-diode",
+        "netbox_to_diode_client_secret": "veVUxfl9reMcOW7gBkNRaT7KoB+Pt72vIadI14bpN4="
     },
 }
+# restante omitido
 ```
 
 *obs: diode_targe_override é o grpc do diode, não do netbox*
 
-2. Reconstrua e inicie os containers:
+3. Reconstrua e inicie os containers do netbox-docker
 
 ```bash
+cd /opt/netbox-docker/netbox/
 docker compose build --no-cache
 docker compose up -d
+docker images | grep netbox
 ```
 
-## No Netbox (sem docker)
+Ao executar o comando *docker images | grep netbox* uma nova imagem foi criada com o nome de `netbox-with-diode:latest`. Isso torna o plugin permanente.
 
-1. acessar o container do netbox como root
+4. Validação
 
-```bash
-docker compose exec -u root netbox bash
-```
+Acesse o netbox e confira se o Plugin Diode aparece na interface
 
-2. habilitar o venv do netbox
+![alt text](diode-plugin.png)
 
-```bash
-cd /opt/netbox
-source venv/bin/activate
-```
-
-3. Instalar o python3-pip
-
-```bash
-apt update
-apt install -y python3-pip
-```
-
-4. Instalar o plugin NetBox DIODE plugin
-
-```bash
-pip3 install --target=/opt/netbox/venv/lib/python3.12/site-packages \
-  --break-system-packages \
-  netboxlabs-diode-netbox-plugin
-
-# verificar se foi instalado
-ls -la /opt/netbox/venv/lib/python3.12/site-packages/ | grep -i diode
-
-# saia do container
-exit
-```
-
-5. Crie uma nova imagem do docker com o plugin (sugestão)
-
-*isso torna o plugin permanente*
-
-```bash
-docker commit netbox-netbox-1 netbox-with-diode:latest
-
-# para visualizar a imagem nova
-docker images | grep netbox-with-diode
-```
-
-6. Configurar o docker compose para usar a imagem nova criada
-
-- Editar o arquivo `docker-compose.override.yml` e adicionar a imagem abaixo dentro do netbox:
-
-```yaml
-services:
-  netbox:
-    #image: netboxcommunity/netbox:v4.5.8-4.0.2
-    image: netbox-with-diode:latest
-  ... (restante omitido)
-```
-
-7. Configurar o plugin
-
-- Configurar o arquivo de plugins do Netbox para adicionar o plugin e as credenciais de `client_secret` e `client_id` gerados em `client-credentials.json` no diretório do diode server do passo anterior
-
-```bash
-nano configuration/plugins.py
-```
-
-```python
-PLUGINS = [
-    "netbox_diode_plugin",
-]
-
-PLUGINS_CONFIG = {
-    "netbox_diode_plugin": {
-        "diode_target_override": "grpc://<hostname_diode>:<port>/diode",
-        "diode_username": "diode",
-        "client_id": "<YOUR_CLIENT_ID>",
-        "netbox_to_diode_client_secret": "<YOUR_CLIENT_SECRET>"
-    },
-}
-```
-
-*obs: diode_targe_override é o grpc do diode, não do netbox*
-
-- Subir novamente o netbox com a imagem nova
-
-```bash
-# criar uma nova tabela no banco de dados para esse plugin
-docker compose exec netbox python3 /opt/netbox/netbox/manage.py 
-# baixar a imagem do netbox
-docker compose down
-# subir novamente a imagem do netbox
-docker compose up -d
-# validar que o docker subiu com a nova imagem
-docker compose ps
-```
+---
 
 # Instalação do Orb Agent
 
-1. Acessar diretório criado anteriormente e criar arquivo de configuração do orb agent:
+1. Gerar Credenciais Netbox -> Diode/Orb
+
+Na interface web do NetBox, vá em 'Diode' -> 'Client Credentials' e crie uma nova credencial para o seu agente. Guarde o Client ID e o Client Secret gerados, pois você os usará no arquivo `agent.yaml` do Orb Agent."
+
+
+
+1. Configurar o arquivo de agente do Orb. Já existe um arquivo pré-configurado, basta executar os comandos abaixo para copia-lo:
 
 ```bash
-cd /opt/netbox-discovery/orb-agent
-nano config.yaml
+cp /opt/netbox-docker/netbox-custom/netbox-diode/orb-agent/agent.yaml /opt/netbox-discovery/orb-agent
 ```
 
-2. Gerar Credenciais Netbox -> Diode/Orb
-
-Na interface web do NetBox, vá em 'Diode' -> 'Client Credentials' e crie uma nova credencial para o seu agente. Guarde o Client ID e o Client Secret gerados, pois você os usará no arquivo config.yaml do Orb Agent."
 
 
 Exemplo de config.yaml criado:

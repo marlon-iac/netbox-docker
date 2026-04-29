@@ -3,7 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-Plugins
-    image: netbox:latest-plugins
+    image: netbox-with-diode:latest
+    restart: unless-stopped
+    environment:
+      SUPERUSER_NAME: admin
+      SUPERUSER_EMAIL: admin@example.com
+      SUPERUSER_PASSWORD: Admin@1234567890
+      SKIP_SUPERUSER: "false"  # Garante a criação (padrão é false)
     ports:
       - "8000:8080"
     healthcheck:
@@ -12,7 +18,8 @@ services:
       interval: 30s
       retries: 5
   netbox-worker:
-    image: netbox:latest-plugins
+    image: netbox-with-diode:latest
     build:
       context: .
       dockerfile: Dockerfile-Plugins
+    restart: unless-stopped
