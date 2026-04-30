@@ -74,6 +74,8 @@ cat /opt/netbox-discovery/diode/oauth2/client/client-credentials.json
 
 ```bash
 cd /opt/netbox-discovery/diode/
+#faz um replace no arquivo docker-compose para que em casos de reboot no servidor, ele suba novamente automaticamente.
+sed -i -E 's/(restart:[[:space:]]*)on-failure/\1unless-stopped/g' docker-compose.yaml
 docker compose up -d
 
 # Verificar status
