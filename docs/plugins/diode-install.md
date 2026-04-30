@@ -2,7 +2,81 @@ https://chat.deepseek.com/a/chat/s/59395b4b-ce8b-4b2c-9b57-5b898d9bee43
 
 # Sobre
 
-Plugin do netbox para adicionar de forma automática devices de rede no netbox
+O plugin **Diode** é utilizado para integrar dados de descoberta automática ao **NetBox**, permitindo a criação e atualização de objetos como dispositivos, interfaces e VLANs a partir de fontes externas, como o **Orb Agent**.
+
+Ele funciona como um mecanismo de **ingestão de dados (data ingestion)**, recebendo informações coletadas no ambiente de rede e aplicando essas mudanças no NetBox através de um fluxo baseado em diff e change sets.
+
+## Como o Diode funciona
+
+O fluxo de funcionamento é baseado em três etapas principais:
+
+1. Coleta de dados (ex: via Orb Agent usando NAPALM)
+2. Geração de diferenças (GenerateDiff)
+3. Aplicação das mudanças (ApplyChangeSet)
+
+O próprio plugin expõe endpoints específicos para isso:
+
+- /generate-diff/
+- /apply-change-set/
+
+Esses endpoints evidenciam que o modelo é orientado a criação e atualização de objetos, e não a reconciliação destrutiva.
+
+Fonte [código oficial do plugin](https://github.com/netboxlabs/diode-netbox-plugin/blob/develop/netbox_diode_plugin/api/urls.py)
+
+## ⚠️ Limitação importante: ausência de remoção automática (delete/prune)
+
+Atualmente, o Diode **não realiza a exclusão automática de objetos** no NetBox quando eles deixam de existir na origem (ex: VLAN removida do switch ou device desativado).
+
+Isso ocorre porque:
+
+- O mecanismo de reconciliação implementado considera apenas operações de:
+
+  - **create**
+  - **update**
+  - **noop**
+
+- Não há suporte nativo para operações de **delete** no fluxo de *change set*
+
+Essa limitação pode ser observada no comportamento do reconciler do Diode, que não define um tipo de mudança para exclusão.
+
+---
+
+## Por que o delete não é automático?
+
+Essa decisão é intencional e alinhada ao modelo do NetBox:
+
+- Evita exclusões causadas por falhas temporárias de coleta (timeout, credenciais, rede)
+- Mantém o NetBox como uma **fonte de verdade controlada**, não totalmente dependente do estado momentâneo dos dispositivos
+- Permite que objetos existam no inventário mesmo sem estarem ativos (ex: planejamento, staging, documentação)
+
+A própria filosofia do NetBox reforça que alterações destrutivas devem ser **intencionais**, não automáticas:
+
+Fonte: [NetBox Labs FAQ](https://netboxlabs.com/docs/integrations/platform-integrations/cisco-aci/cisco-aci-faq/#frequently-asked-questions)
+
+--
+
+## Implicações práticas
+
+* VLANs removidas do device **continuarão existindo no NetBox**
+* Devices desativados **não serão automaticamente removidos**
+* O sistema atua mais como:
+
+  * **descoberta + atualização contínua**
+  * e não como sincronização completa bidirecional
+
+---
+
+## Boas práticas recomendadas
+
+Para ambientes mais maduros, recomenda-se:
+
+- Utilizar o NetBox como **source of truth**
+- Usar o discovery como mecanismo de:
+
+  - auditoria
+  - detecção de drift
+
+- Implementar automações externas (ex: scripts via API, Ansible) caso seja necessário remover objetos órfãos
 
 ---
 
@@ -294,8 +368,9 @@ cd /opt/netbox-discovery/orb-agent && docker compose restart
 
 - Orb Agent:
 
-  - https://github.com/netboxlabs/orb-agent
+  - https://deepwiki.com/netboxlabs/orb-agent
   - https://deepwiki.com/netboxlabs/orb-agent/2.2-quick-start-configuration
+  - https://github.com/netboxlabs/orb-agent
   - https://netboxlabs.com/docs/orb-agent/config_samples/
 
 - Diode:
@@ -304,3 +379,5 @@ cd /opt/netbox-discovery/orb-agent && docker compose restart
   - https://netboxlabs.com/docs/discovery/getting-started/
   - https://github.com/netboxlabs/diode/blob/develop/GET_STARTED.md
   - https://github.com/netboxlabs/diode
+  - https://netboxlabs.com/blog/introducing-diode-streamlining-data-ingestion-in-netbox/
+  - https://deepwiki.com/netboxlabs/diode

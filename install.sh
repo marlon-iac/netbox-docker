@@ -27,6 +27,13 @@ apt-get update -y
 apt-get install -y ca-certificates curl git
 
 # ==============================
+# TIMEZONE SAO PAULO CONFIG AND NTP
+# ==============================
+timedatectl set-timezone America/Sao_Paulo
+timedatectl set-ntp true
+systemctl restart systemd-timesyncd
+
+# ==============================
 # INIT SUBMODULE
 # ==============================
 echo "Inicializando submodule..."

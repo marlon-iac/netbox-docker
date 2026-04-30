@@ -3,12 +3,13 @@ orb:
     active: local
   backends:
     network_discovery: {} # Ativa o módulo de varredura de rede (nmap)
-    device_discovery: {}   # Ativa o módulo de investigação de dispositivos (NAPALM)
+    device_discovery: {}   # Ativa o módulo de investigação de dispositivos (NAPALM) - obs: o módulo network_discovery é obrigatório para fazer o nmap dos ips na rede
+    snmp_discovery: {}          # Ativa o backend para SNMP
     common:
       diode:
         target: grpc://192.168.249.175:8080/diode  # Endereço do servidor Diode
-        client_id: orb-agent-01ad7fe438d1eff4      # Seu client_id gerado no plugin do diode no netbox
-        client_secret: UjA6UXUVwUIi8Qun+Fg+RldpJlqZIIGFn1W4wZPw0Ik= # Seu client_secret gerado no plugin do diode no netbox
+        client_id: orb-agent-4aa291cc8012489f      # Seu client_id gerado no plugin do diode no netbox
+        client_secret: FlWaF2mkYJnXDR9xw+sQNB7prbOXN481g1Aw2Q6uPRg= # Seu client_secret gerado no plugin do diode no netbox
         agent_name: orb-agent  # O Client name gerado no plugin do diode no netbox
   policies:
     network_discovery:
@@ -19,6 +20,26 @@ orb:
         scope:
           targets: # LISTA DE TODAS AS REDES
             - "192.168.249.0/24"
+
+    # política para descoberta SNMP
+    snmp_discovery:
+      minha_rede_snmp:
+        config:
+          schedule: "* * * * *"   # A cada 1 minutos
+          timeout: 300              # Timeout total da política (segundos)
+          snmp_timeout: 10          # Timeout para cada operação SNMP
+          retries: 3                # Tentativas em caso de falha
+          defaults:
+            # site: "Data Center"
+            role: "switch"
+            tags: ["snmp-discovery", "orb-agent"]
+        scope:
+          targets:
+            - host: "192.168.249.0/24"  # Sub-rede a ser escaneada
+          # Autenticação SNMP (pode ser sobrescrita por target)
+          authentication:
+            protocol_version: "SNMPv2c"
+            community: "device_finder"         # ⚠️ Use ${SNMP_COMMUNITY} para segurança
 
     device_discovery:
       cisco_credencials:          # nome sugestivo para a politica

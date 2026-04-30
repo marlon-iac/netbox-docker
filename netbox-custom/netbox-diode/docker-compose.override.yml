@@ -12,6 +12,9 @@ services:
       SUPERUSER_EMAIL: admin@example.com
       SUPERUSER_PASSWORD: Admin@1234567890
       SKIP_SUPERUSER: "false"  # Garante a criação (padrão é false)
+      # O NetBox e o Django utilizam esta variável para
+      # formatar datas e horas na interface web e no banco de dados.
+      TIME_ZONE: "America/Sao_Paulo"
     ports:
       - "8000:8080"
     healthcheck:
