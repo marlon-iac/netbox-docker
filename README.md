@@ -46,6 +46,7 @@ Após o término da instalação, o NetBox estará disponível em:
 
 |- docs/: Documentação detalhada sobre procedimentos específicos.
 |-- plugins/: Documentação sobre plugins do netbox.
+|- integrações/: Documentações e exemplos de integrações com netbox
 |- netbox/: Repositório oficial do `netbox-docker` (submódulo).
 |- netbox-custom/: Diretório onde ficam arquivos e customizações de plugin e netbox-docker.
 |-- netbox/: Diretório com o arquivo docker customizado para o netbox-docker.
@@ -66,7 +67,6 @@ Para demais guias, consulte os arquivos na pasta [`docs/`](./docs/).
 - **PostgreSQL:** Banco de dados.
 - **Redis:** Para cache e gerenciamento de tarefas em segundo plano.
 - **Ubuntu 22.04:** SO utilizado.
-
 
 ## Referencias
 
