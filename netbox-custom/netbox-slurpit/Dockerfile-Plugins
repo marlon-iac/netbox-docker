@@ -1,5 +1,4 @@
-# referencia: https://redes-abertas.readthedocs.io/en/Guias/Netbox/Plugins/Branching/?utm_source=chatgpt.com
-FROM netboxcommunity/netbox:v4.5-4.0.2
+FROM netboxcommunity/netbox:v4.5.8-4.0.2
 
 COPY ./plugin_requirements.txt /opt/netbox/
 RUN /usr/local/bin/uv pip install --no-cache -r /opt/netbox/plugin_requirements.txt

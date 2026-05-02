@@ -1,5 +1,3 @@
-https://chat.deepseek.com/a/chat/s/59395b4b-ce8b-4b2c-9b57-5b898d9bee43
-
 # Sobre
 
 O plugin **Diode** é utilizado para integrar dados de descoberta automática ao **NetBox**, permitindo a criação e atualização de objetos como dispositivos, interfaces e VLANs a partir de fontes externas, como o **Orb Agent**.
