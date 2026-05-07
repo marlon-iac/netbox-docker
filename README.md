@@ -62,20 +62,14 @@ nano .env  # Edite porta, senha, versão, etc.
 ```
 
 **Principais variáveis (em `.env`):**
-- `NETBOX_VERSION`: Versão da imagem Docker (padrão: `v4.5.8-4.0.2`)
+- `NETBOX_VERSION`: Versão da imagem Docker (padrão definido em `.env.example`)
 - `NETBOX_PORT`: Porta de acesso (padrão: `8000`)
 - `SUPERUSER_NAME`: Usuário admin (padrão: `admin`)
-- `SUPERUSER_PASSWORD`: Senha do admin (padrão: `Admin@1234567890`)
+- `SUPERUSER_PASSWORD`: Senha do admin
 - `TIME_ZONE`: Fuso horário (padrão: `America/Sao_Paulo`)
 
-> ⚠️ **Senhas de Banco e Redis:** O script `install.sh` gera senhas fortes automaticamente (padrão oficial) se estiverem vazias ou fracas (`netbox`). Você também pode definir suas próprias senhas antes de executar.
-> 🔐 **Secret Key:** O Django `SECRET_KEY` é gerado automaticamente se estiver vazio.
-
-**Exemplo de senhas geradas (padrão oficial):**
-- `POSTGRES_PASSWORD`: `J5brHrAXFLQSif0K`
-- `REDIS_PASSWORD`: `H733Kdjndks81`
-- `REDIS_CACHE_PASSWORD`: `t4Ph722qJ5QHeQ1qfu36` (diferente do Redis!)
-
+> ⚠️ **Senhas e Chaves Secretas:** O script `install.sh` gera senhas fortes automaticamente (padrão oficial) se estiverem vazias ou fracas. O `SECRET_KEY` do Django também é gerado automaticamente.
+>
 > 💡 **Dica:** O arquivo `.env` é ignorado pelo Git (`.gitignore`), então suas senhas nunca serão versionadas!
 
 ## 3. Execute o script de instalação:
@@ -102,8 +96,10 @@ Após o término da instalação, o NetBox estará disponível em:
 
 ## Credenciais de Primeiro Acesso
 
-- **Usuário:** `admin` (ou o configurado em `SUPERUSER_NAME` no `.env`)
-- **Senha:** `Admin@1234567890` (ou a configurada em `SUPERUSER_PASSWORD` no `.env`)
+As credenciais de acesso são definidas no arquivo `.env`:
+
+- **Usuário:** Configurado em `SUPERUSER_NAME` (padrão: `admin`)
+- **Senha:** Configurada em `SUPERUSER_PASSWORD`
 
 > ⚠️ **IMPORTANTE:** Por segurança, altere a senha do usuário `admin` imediatamente após o primeiro login.
 
@@ -166,7 +162,7 @@ Para demais guias, consulte os arquivos na pasta [`docs/`](./docs/).
 
 # 🛠️ Tecnologias Utilizadas
 
-- **NetBox (v4.5.8-4.0.2):** IPAM/DCIM open source.
+- **NetBox:** IPAM/DCIM open source.
   - *Versão alterável via variável `NETBOX_VERSION` no arquivo `.env`*
 - **Docker & Docker Compose:** Para facilidade de execução.
 - **PostgreSQL:** Banco de dados.
