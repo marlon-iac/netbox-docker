@@ -5,11 +5,12 @@ set -euo pipefail
 # FUNÇÕES AUXILIARES
 # ==============================
 
-# Gerar senha aleatória (32 caracteres, padrão oficial)
+# Gerar senha aleatória (60 caracteres, atende Django SECRET_KEY >= 50)
 generate_password() {
   local password=""
-  while [ ${#password} -lt 32 ]; do
-    char=$(</dev/urandom tr -dc 'A-Za-z0-9' | head -c 1)
+  # Django exige pelo menos 50 caracteres para SECRET_KEY
+  while [ ${#password} -lt 60 ]; do
+    char=$(</dev/urandom tr -dc 'A-Za-z0-9!@#$%^&*()_+-=[]{}|;:,.<>?' | head -c 1)
     password="${password}${char}"
   done
   echo "$password"
@@ -129,6 +130,13 @@ echo "✅ Porta ${NETBOX_PORT} disponível."
 # INIT SUBMODULE
 # ==============================
 echo "Inicializando submodule..."
+
+# Limpeza: remover diretório netbox/ se existir (evita erro de diretório não vazio)
+if [ -d "${NETBOX_DIR}" ]; then
+  echo "Removendo diretório netbox/ existente..."
+  rm -rf "${NETBOX_DIR}"
+fi
+
 git submodule update --init --recursive
 
 if [ ! -f "${NETBOX_DIR}/docker-compose.yml" ]; then
