@@ -188,6 +188,12 @@ echo "Baixando imagens..."
 docker compose --env-file "${ENV_FILE}" pull
 
 echo "Subindo containers..."
+# Limpar volumes anteriores para evitar conflito de senhas (PostgreSQL)
+# Volumes persistem dados mesmo após 'docker rm', causando falha de autenticação
+cd "${NETBOX_DIR}"
+docker compose --env-file "${ENV_FILE}" down -v 2>/dev/null || true
+cd "${BASE_DIR}"
+
 docker compose --env-file "${ENV_FILE}" up -d
 
 # ==============================
