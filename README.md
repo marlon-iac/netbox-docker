@@ -68,6 +68,16 @@ nano .env  # Edite porta, senha, versão, etc.
 - `SUPERUSER_PASSWORD`: Senha do admin (padrão: `Admin@1234567890`)
 - `TIME_ZONE`: Fuso horário (padrão: `America/Sao_Paulo`)
 
+> ⚠️ **Senhas de Banco e Redis:** O script `install.sh` gera senhas fortes automaticamente (padrão oficial) se estiverem vazias ou fracas (`netbox`). Você também pode definir suas próprias senhas antes de executar.
+> 🔐 **Secret Key:** O Django `SECRET_KEY` é gerado automaticamente se estiver vazio.
+
+**Exemplo de senhas geradas (padrão oficial):**
+- `POSTGRES_PASSWORD`: `J5brHrAXFLQSif0K`
+- `REDIS_PASSWORD`: `H733Kdjndks81`
+- `REDIS_CACHE_PASSWORD`: `t4Ph722qJ5QHeQ1qfu36` (diferente do Redis!)
+
+> 💡 **Dica:** O arquivo `.env` é ignorado pelo Git (`.gitignore`), então suas senhas nunca serão versionadas!
+
 ## 3. Execute o script de instalação:
 
 ```bash

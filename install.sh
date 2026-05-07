@@ -2,6 +2,15 @@
 set -euo pipefail
 
 # ==============================
+# FUNÇÕES AUXILIARES
+# ==============================
+
+# Gerar senha aleatória (32 caracteres, padrão oficial)
+generate_password() {
+  tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32
+}
+
+# ==============================
 # CONFIG
 # ==============================
 export DEBIAN_FRONTEND=noninteractive
@@ -35,6 +44,45 @@ else
     echo "⚠️  Arquivo .env.example não encontrado. Usando valores padrão."
   fi
 fi
+
+# ==============================
+# GERAR SENHAS FORTES (PADRÃO OFICIAL)
+# ==============================
+echo "Verificando senhas..."
+
+# Lista de variáveis que devem ser senhas fortes
+PASSWORDS_TO_CHECK=(
+  "POSTGRES_PASSWORD"
+  "DB_PASSWORD"
+  "REDIS_PASSWORD"
+  "REDIS_CACHE_PASSWORD"
+  "SECRET_KEY"
+)
+
+for var in "${PASSWORDS_TO_CHECK[@]}"; do
+  current_value="${!var:-}"
+  
+  # Se vazio OU se for senha fraca (padrão anterior)
+  if [ -z "$current_value" ] || [ "$current_value" = "netbox" ] || [ "$current_value" = "Admin@1234567890" ]; then
+    echo "  Gerando ${var} forte..."
+    new_password=$(generate_password)
+    
+    # Atualizar variável atual
+    export $var="$new_password"
+    
+    # Atualizar arquivo .env (usando sed)
+    if [ -f "${ENV_FILE}" ]; then
+      # Se a linha existe, substitui; senão, adiciona
+      if grep -q "^${var}=" "${ENV_FILE}"; then
+        sed -i "s|^${var}=.*|${var}=${new_password}|" "${ENV_FILE}"
+      else
+        echo "${var}=${new_password}" >> "${ENV_FILE}"
+      fi
+    fi
+  fi
+done
+
+echo "✅ Senhas verificadas/geradas!"
 
 # Definir variáveis com fallback
 NETBOX_PORT="${NETBOX_PORT:-8000}"
@@ -137,7 +185,7 @@ ELAPSED=0
  until curl -s -o /dev/null -w "%{http_code}" http://localhost:${NETBOX_PORT} | grep -qE "200|302"; do
   printf "NetBox ainda não disponível... %ds elapsed\r" "$ELAPSED"
   sleep 10
-  ELAPSED=$((ELAPSED + 10))
+  ELAPSED=$((ELAPSED + 10))  
   
   # Timeout de 15 minutos
   if [ $ELAPSED -ge 900 ]; then

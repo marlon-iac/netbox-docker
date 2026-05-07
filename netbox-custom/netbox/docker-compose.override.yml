@@ -10,6 +10,21 @@ services:
       # O NetBox e o Django utilizam esta variável para
       # formatar datas e horas na interface web e no banco de dados.
       TIME_ZONE: "${TIME_ZONE:-America/Sao_Paulo}"
+      # Banco de dados
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_NAME: ${DB_NAME:-netbox}
+      DB_USER: ${DB_USER:-netbox}
+      DB_PASSWORD: ${DB_PASSWORD:-J5brHrAXFLQSif0K}
+      # Redis (Task Queue)
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_DATABASE: ${REDIS_DATABASE:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-H733Kdjndks81}
+      # Redis (Cache)
+      REDIS_CACHE_HOST: ${REDIS_CACHE_HOST:-redis-cache}
+      REDIS_CACHE_DATABASE: ${REDIS_CACHE_DATABASE:-1}
+      REDIS_CACHE_PASSWORD: ${REDIS_CACHE_PASSWORD:-t4Ph722qJ5QHeQ1qfu36}
+      # Secret Key (gerada automaticamente se vazia)
+      SECRET_KEY: ${SECRET_KEY:-}
     restart: unless-stopped
     ports:
       - "${NETBOX_PORT:-8000}:8080"
@@ -21,6 +36,19 @@ services:
 
   netbox-worker:
     image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.5.8-4.0.2}
+    environment:
+      # Mesmas variáveis do netbox (necessárias para o worker)
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_NAME: ${DB_NAME:-netbox}
+      DB_USER: ${DB_USER:-netbox}
+      DB_PASSWORD: ${DB_PASSWORD:-J5brHrAXFLQSif0K}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_DATABASE: ${REDIS_DATABASE:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-H733Kdjndks81}
+      REDIS_CACHE_HOST: ${REDIS_CACHE_HOST:-redis-cache}
+      REDIS_CACHE_DATABASE: ${REDIS_CACHE_DATABASE:-1}
+      REDIS_CACHE_PASSWORD: ${REDIS_CACHE_PASSWORD:-t4Ph722qJ5QHeQ1qfu36}
+      SECRET_KEY: ${SECRET_KEY:-}
     restart: unless-stopped
 
   postgres:
@@ -28,14 +56,14 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-netbox}
       POSTGRES_USER: ${POSTGRES_USER:-netbox}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netbox}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-J5brHrAXFLQSif0K}
 
   redis:
     restart: unless-stopped
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-H733Kdjndks81}
 
   redis-cache:
     restart: unless-stopped
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_PASSWORD: ${REDIS_CACHE_PASSWORD:-t4Ph722qJ5QHeQ1qfu36}
