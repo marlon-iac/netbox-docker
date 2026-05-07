@@ -9,6 +9,8 @@ export DEBIAN_FRONTEND=noninteractive
 BASE_DIR="/opt/netbox-docker"
 NETBOX_DIR="${BASE_DIR}/netbox"
 OVERRIDE_FILE="${BASE_DIR}/netbox-custom/netbox/docker-compose.override.yml"
+ENV_EXAMPLE="${BASE_DIR}/netbox-custom/netbox/.env.example"
+ENV_FILE="${NETBOX_DIR}/netbox-custom.env"
 NETBOX_PORT=8000
 IP_ADDR=$(hostname -I | awk '{print $1}')
 
@@ -24,7 +26,7 @@ fi
 # INSTALL DEPENDENCIES
 # ==============================
 apt-get update -y
-apt-get install -y ca-certificates curl git
+apt-get install -y ca-certificates curl git python3
 
 # ==============================
 # TIMEZONE SAO PAULO CONFIG AND NTP
@@ -77,7 +79,7 @@ fi
 systemctl enable --now docker
 
 # ==============================
-# DEPLOY NETBOX (Official Approach)
+# DEPLOY NETBOX (Simplified for Lab)
 # ==============================
 cd "${NETBOX_DIR}"
 
@@ -88,29 +90,23 @@ docker compose down -v 2>/dev/null || true
 echo "Aplicando override..."
 cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
 
-# Official: Use separate env files per service (netbox.env, postgres.env, redis.env, redis-cache.env)
-# If they don't exist, create from examples
-if [ ! -f "netbox.env" ] && [ -f "netbox.env.example" ]; then
-  echo "Copiando netbox.env.example para netbox.env..."
-  cp netbox.env.example netbox.env
-fi
-
-if [ ! -f "postgres.env" ] && [ -f "postgres.env.example" ]; then
-  echo "Copiando postgres.env.example para postgres.env..."
-  cp postgres.env.example postgres.env
+# Copy .env.example to netbox-custom.env if it doesn't exist
+if [ ! -f "${ENV_FILE}" ] && [ -f "${ENV_EXAMPLE}" ]; then
+  echo "Copiando .env.example para netbox-custom.env..."
+  cp "${ENV_EXAMPLE}" "${ENV_FILE}"
 fi
 
 # Generate SECRET_KEY using official method (NOT tr/sed!)
-if [ -f "netbox.env" ] && grep -q "SECRET_KEY=.*" netbox.env 2>/dev/null; then
-  echo "netbox.env já possui SECRET_KEY configurado."
+if [ -f "${ENV_FILE}" ] && ! grep -q "SECRET_KEY=gerar_com_python" "${ENV_FILE}" 2>/dev/null; then
+  echo "netbox-custom.env já possui SECRET_KEY configurado."
 else
   echo "Gerando SECRET_KEY oficial (docker compose run netbox python3 /opt/netbox/netbox/generate_secret_key.py)..."
   NEW_KEY=$(docker compose run --rm netbox python3 /opt/netbox/netbox/generate_secret_key.py 2>/dev/null | tr -d '\n')
   if [ -n "$NEW_KEY" ]; then
-    echo "SECRET_KEY=$NEW_KEY" >> netbox.env
+    sed -i "s|SECRET_KEY=gerar_com_python|SECRET_KEY=$NEW_KEY|g" "${ENV_FILE}"
     echo "SECRET_KEY gerada com sucesso!"
   else
-    echo "Aviso: Não foi possível gerar SECRET_KEY automaticamente. Configure manualmente no netbox.env"
+    echo "Aviso: Não foi possível gerar SECRET_KEY automaticamente. Configure manualmente no netbox-custom.env"
   fi
 fi
 
@@ -164,19 +160,21 @@ systemctl enable netbox
 # INFO FINAL
 # ==============================
 echo "=================================================="
-echo "✅ NetBox instalado com sucesso (padrão oficial)!"
+echo "✅ NetBox instalado com sucesso (configuração simplificada para laboratório)!"
 echo "=================================================="
 echo ""
 echo "Docker: $(docker --version)"
 echo ""
 echo "Acesse: http://${IP_ADDR}:${NETBOX_PORT}"
 echo ""
-echo "Arquivos de configuração (oficiais):"
-echo "  - ${NETBOX_DIR}/netbox.env"
-echo "  - ${NETBOX_DIR}/postgres.env"
-echo "  - ${NETBOX_DIR}/redis.env"
-echo "  - ${NETBOX_DIR}/redis-cache.env"
+echo "Arquivos de configuração:"
+echo "  - ${ENV_FILE} (copiado de ${ENV_EXAMPLE})"
 echo "  - ${NETBOX_DIR}/docker-compose.override.yml"
+echo ""
+echo "Credenciais padrão:"
+echo "  - Usuário: admin"
+echo "  - Senha: admin"
+echo "  (definidas em SUPERUSER_* no netbox-custom.env)"
 echo ""
 echo "Para logs: cd ${NETBOX_DIR} && docker compose logs -f netbox"
 echo "=================================================="
