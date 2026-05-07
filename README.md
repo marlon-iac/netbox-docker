@@ -3,10 +3,14 @@ title: Netbox Docker
 description: Guia de instalação e configuração do NetBox com Docker e seus plugins.
 ---
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/netboxcommunity/netbox?style=flat-square)](https://hub.docker.com/r/netboxcommunity/netbox)
+[![GitHub Issues](https://img.shields.io/github/issues/marlon-iac/netbox-docker?style=flat-square)](https://github.com/marlon-iac/netbox-docker/issues)
+[![License: MIT](https://img.shields.io/github/license/marlon-iac/netbox-docker?style=flat-square)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/marlon-iac/netbox-docker?style=flat-square)](https://github.com/marlon-iac/netbox-docker/stargazers)
+
 **Sumário**
 
 - [📋 Pré-requisitos](#-pré-requisitos)
-- [⚙️ Configuração Personalizada (.env)](#️-configuração-personalizada-env)
 - [⚙️ Instalação](#️-instalação)
 - [🖥️ Como Usar](#️-como-usar)
   - [Credenciais de Primeiro Acesso](#credenciais-de-primeiro-acesso)
@@ -29,64 +33,46 @@ Esse ambiente foi testado com os requisitos abaixo:
 - **Processamento:** 2 CPUs (vCPUs).
 - **Acesso:** Usuário com privilégios de `sudo`.
 
-# ⚙️ Configuração Personalizada (.env)
-
-O projeto utiliza um arquivo `.env` para configurações personalizadas. **Recomendamos fortemente** que você revise essas configurações antes da instalação.
-
-## Passo a passo:
-
-1. **Após clonar o repositório, crie seu arquivo `.env`:**
-
-   ```bash
-   cd /opt/netbox-docker
-   cp .env.example .env
-   ```
-
-2. **Edite o arquivo `.env` com suas preferências:**
-
-   ```bash
-   nano .env
-   ```
-
-   **Principais variáveis:**
-   - `NETBOX_PORT`: Porta de acesso (padrão: `8000`)
-   - `SUPERUSER_NAME`: Usuário admin (padrão: `admin`)
-   - `SUPERUSER_PASSWORD`: Senha do admin (padrão: `Admin@1234567890`)
-   - `TIME_ZONE`: Fuso horário (padrão: `America/Sao_Paulo`)
-
-3. **Salve o arquivo** e prossiga com a instalação.
-
-> 💡 **Dica:** O arquivo `.env` é ignorado pelo Git (`.gitignore`), então suas senhas nunca serão versionadas!
-
 # ⚙️ Instalação
 
 O processo é automatizado através de um script de instalação. Siga os passos abaixo:
 
-1. **Clone o repositório:**
+## 1. Clone o repositório:
 
-    ```bash
-    sudo git clone https://github.com/marlon-iac/netbox-docker.git /opt/netbox-docker
-    ```
+```bash
+sudo git clone https://github.com/marlon-iac/netbox-docker.git /opt/netbox-docker
+```
 
-2. **(Opcional) Configure suas preferências:**
-   
-    ```bash
-    cd /opt/netbox-docker
-    cp .env.example .env
-    nano .env  # Edite porta, senha, etc.
-    ```
+## 2. (Opcional) Configure suas preferências:
 
-3. **Execute o script de instalação:**
+O projeto utiliza um arquivo `.env` para configurações personalizadas. **Recomendamos fortemente** que você revise essas configurações antes da instalação.
 
-    ```bash
-    cd /opt/netbox-docker && sudo ./install.sh
-    ```
+```bash
+cd /opt/netbox-docker
+cp .env.example .env
+nano .env  # Edite porta, senha, versão, etc.
+```
+
+**Principais variáveis (em `.env`):**
+- `NETBOX_VERSION`: Versão da imagem Docker (padrão: `v4.5.8-4.0.2`)
+- `NETBOX_PORT`: Porta de acesso (padrão: `8000`)
+- `SUPERUSER_NAME`: Usuário admin (padrão: `admin`)
+- `SUPERUSER_PASSWORD`: Senha do admin (padrão: `Admin@1234567890`)
+- `TIME_ZONE`: Fuso horário (padrão: `America/Sao_Paulo`)
+
+> 💡 **Dica:** O arquivo `.env` é ignorado pelo Git (`.gitignore`), então suas senhas nunca serão versionadas!
+
+## 3. Execute o script de instalação:
+
+```bash
+cd /opt/netbox-docker && sudo ./install.sh
+```
 
 O script irá:
 - Instalar o Docker (se necessário)
-- Baixar as imagens do NetBox
+- Ler as variáveis do seu `.env` (ou criar um `.env` padrão automaticamente)
+- Baixar as imagens do NetBox na versão configurada
 - Configurar o NetBox com Docker como um serviço automático do sistema (`systemd`)
-- Criar o arquivo `.env` automaticamente se você não o fez
 
 > ⏳ **Primeira inicialização:** O NetBox pode levar até **10 minutos** na primeira vez (inicialização do banco de dados). Aguarde o script terminar!
 
@@ -94,7 +80,7 @@ O script irá:
 
 Após o término da instalação, o NetBox estará disponível em:
 
-- **URL:** `http://<IP-DO-SEU-SERVIDOR>:8000` (ou a porta configurada no `.env`)
+- **URL:** `http://<IP-DO-SEU-SERVIDOR>:<PORTA>` (ou a porta configurada no `.env`)
 
 ## Credenciais de Primeiro Acesso
 
@@ -155,6 +141,7 @@ Para demais guias, consulte os arquivos na pasta [`docs/`](./docs/).
 # 🛠️ Tecnologias Utilizadas
 
 - **NetBox (v4.5.8-4.0.2):** IPAM/DCIM open source.
+  - *Versão alterável via variável `NETBOX_VERSION` no arquivo `.env`*
 - **Docker & Docker Compose:** Para facilidade de execução.
 - **PostgreSQL:** Banco de dados.
 - **Redis:** Para cache e gerenciamento de tarefas em segundo plano.
