@@ -25,6 +25,8 @@ services:
       REDIS_CACHE_PASSWORD: ${REDIS_CACHE_PASSWORD:-t4Ph722qJ5QHeQ1qfu36}
       # Secret Key (gerada automaticamente se vazia)
       SECRET_KEY: ${SECRET_KEY:-}
+      # Hosts permitidos (CRÍTICO para produção!)
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost 127.0.0.1 ::1}
     restart: unless-stopped
     ports:
       - "${NETBOX_PORT:-8000}:8080"
@@ -49,6 +51,8 @@ services:
       REDIS_CACHE_DATABASE: ${REDIS_CACHE_DATABASE:-1}
       REDIS_CACHE_PASSWORD: ${REDIS_CACHE_PASSWORD:-t4Ph722qJ5QHeQ1qfu36}
       SECRET_KEY: ${SECRET_KEY:-}
+      # Hosts permitidos (CRÍTICO para produção!)
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost 127.0.0.1 ::1}
     restart: unless-stopped
 
   postgres:
