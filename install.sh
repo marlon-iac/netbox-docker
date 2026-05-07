@@ -7,7 +7,12 @@ set -euo pipefail
 
 # Gerar senha aleatória (32 caracteres, padrão oficial)
 generate_password() {
-  tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 32
+  local password=""
+  while [ ${#password} -lt 32 ]; do
+    char=$(</dev/urandom tr -dc 'A-Za-z0-9' | head -c 1)
+    password="${password}${char}"
+  done
+  echo "$password"
 }
 
 # ==============================
