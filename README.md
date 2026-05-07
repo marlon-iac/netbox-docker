@@ -178,3 +178,4 @@ Para demais guias, consulte os arquivos na pasta [`docs/`](./docs/).
 # Referências
 
 - [netbox-docker-wiki](https://github.com/netbox-community/netbox-docker/wiki/)
+- [netbox-docker-deepwiki](https://deepwiki.com/netbox-community/netbox-docker)
