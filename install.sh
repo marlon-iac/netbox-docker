@@ -76,11 +76,12 @@ for var in "${PASSWORDS_TO_CHECK[@]}"; do
     # Atualizar variável atual
     export $var="$new_password"
     
-    # Atualizar arquivo .env (usando sed)
+    # Atualizar arquivo .env (usando sed com separador ~)
     if [ -f "${ENV_FILE}" ]; then
       # Se a linha existe, substitui; senão, adiciona
       if grep -q "^${var}=" "${ENV_FILE}"; then
-        sed -i "s|^${var}=.*|${var}=${new_password}|" "${ENV_FILE}"
+        # Usar ~ como separador (evita conflito com | na senha)
+        sed -i "s~^${var}=.*~${var}=${new_password}~" "${ENV_FILE}"
       else
         echo "${var}=${new_password}" >> "${ENV_FILE}"
       fi
