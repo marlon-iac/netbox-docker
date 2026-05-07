@@ -3,6 +3,11 @@ title: Netbox Docker
 description: Guia de instalação e configuração do NetBox com Docker e seus plugins.
 ---
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/netboxcommunity/netbox?style=flat-square)](https://hub.docker.com/r/netboxcommunity/netbox)
+[![GitHub Issues](https://img.shields.io/github/issues/marlon-iac/netbox-docker?style=flat-square)](https://github.com/marlon-iac/netbox-docker/issues)
+[![License: MIT](https://img.shields.io/github/license/marlon-iac/netbox-docker?style=flat-square)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/marlon-iac/netbox-docker?style=flat-square)](https://github.com/marlon-iac/netbox-docker/stargazers)
+
 **Sumário**
 
 - [📋 Pré-requisitos](#-pré-requisitos)
