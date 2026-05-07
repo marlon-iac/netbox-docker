@@ -2,11 +2,8 @@ services:
 
   netbox:
     image: netboxcommunity/netbox:v4.5.8-4.0.2
-    environment:
-      # Variables loaded from netbox.env (official approach)
-      # SUPERUSER_NAME, SUPERUSER_EMAIL, SUPERUSER_PASSWORD, SECRET_KEY, etc.
-      TIME_ZONE: "America/Sao_Paulo"
-      SKIP_SUPERUSER: "false"  # Set to "true" after first startup
+    env_file:
+      - ./netbox-custom.env  # Arquivo com variáveis externas (copiado de .env.example)
     restart: unless-stopped
     ports:
       - "8000:8080"
@@ -18,6 +15,8 @@ services:
 
   netbox-worker:
     image: netboxcommunity/netbox:v4.5.8-4.0.2
+    env_file:
+      - ./netbox-custom.env
     restart: unless-stopped
 
   postgres:

@@ -2,3 +2,8 @@
 
 # terraform
 .terraform
+
+# NetBox environment files (secrets)
+netbox-custom.env
+*.env
+!.env.example
