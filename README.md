@@ -12,9 +12,15 @@ description: Guia de instalação e configuração do NetBox com Docker e seus p
 
 - [📋 Pré-requisitos](#-pré-requisitos)
 - [⚙️ Instalação](#️-instalação)
+  - [1. Clone o repositório:](#1-clone-o-repositório)
+  - [2. (Opcional) Configure suas preferências:](#2-opcional-configure-suas-preferências)
+  - [3. Execute o script de instalação:](#3-execute-o-script-de-instalação)
 - [🖥️ Como Usar](#️-como-usar)
   - [Credenciais de Primeiro Acesso](#credenciais-de-primeiro-acesso)
 - [🔧 Troubleshooting](#-troubleshooting)
+  - [NetBox demora para iniciar](#netbox-demora-para-iniciar)
+  - [Porta já em uso](#porta-já-em-uso)
+  - [Como reiniciar o NetBox](#como-reiniciar-o-netbox)
 - [📁 Estrutura do Projeto](#-estrutura-do-projeto)
 - [📚 Documentação Adicional](#-documentação-adicional)
 - [🛠️ Tecnologias Utilizadas](#️-tecnologias-utilizadas)
@@ -32,6 +38,8 @@ Esse ambiente foi testado com os requisitos abaixo:
 - **Memória:** Mínimo de 4GB de RAM.
 - **Processamento:** 2 CPUs (vCPUs).
 - **Acesso:** Usuário com privilégios de `sudo`.
+
+---
 
 # ⚙️ Instalação
 
@@ -60,8 +68,6 @@ nano .env  # Edite porta, senha, versão, etc.
 - `SUPERUSER_PASSWORD`: Senha do admin (padrão: `Admin@1234567890`)
 - `TIME_ZONE`: Fuso horário (padrão: `America/Sao_Paulo`)
 
-> 💡 **Dica:** O arquivo `.env` é ignorado pelo Git (`.gitignore`), então suas senhas nunca serão versionadas!
-
 ## 3. Execute o script de instalação:
 
 ```bash
@@ -76,6 +82,8 @@ O script irá:
 
 > ⏳ **Primeira inicialização:** O NetBox pode levar até **10 minutos** na primeira vez (inicialização do banco de dados). Aguarde o script terminar!
 
+---
+
 # 🖥️ Como Usar
 
 Após o término da instalação, o NetBox estará disponível em:
@@ -88,6 +96,8 @@ Após o término da instalação, o NetBox estará disponível em:
 - **Senha:** `Admin@1234567890` (ou a configurada em `SUPERUSER_PASSWORD` no `.env`)
 
 > ⚠️ **IMPORTANTE:** Por segurança, altere a senha do usuário `admin` imediatamente após o primeiro login.
+
+---
 
 # 🔧 Troubleshooting
 
@@ -116,6 +126,8 @@ Se a porta configurada (padrão 8000) já estiver em uso, o script exibirá um e
 sudo systemctl restart netbox
 ```
 
+---
+
 # 📁 Estrutura do Projeto
 
 | Diretório/Arquivo | Descrição |
@@ -130,6 +142,8 @@ sudo systemctl restart netbox
 | `.env.example` | Exemplo de arquivo de configuração (copie para `.env`) |
 | `install.sh` | Script que automatiza toda a configuração inicial |
 
+---
+
 # 📚 Documentação Adicional
 
 Para demais guias, consulte os arquivos na pasta [`docs/`](./docs/).
@@ -137,6 +151,8 @@ Para demais guias, consulte os arquivos na pasta [`docs/`](./docs/).
 - [Diode](./docs/plugins/diode-install.md): Instruções para instalação do plugin `diode`
 - [Terraform](./integrações/terraform/README.md)
 - [PyATS](./integrações/pyats+netbox/README.md)
+
+---
 
 # 🛠️ Tecnologias Utilizadas
 
@@ -146,6 +162,8 @@ Para demais guias, consulte os arquivos na pasta [`docs/`](./docs/).
 - **PostgreSQL:** Banco de dados.
 - **Redis:** Para cache e gerenciamento de tarefas em segundo plano.
 - **Ubuntu 22.04:** SO utilizado.
+
+---
 
 # Referências
 
