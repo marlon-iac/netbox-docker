@@ -1,8 +1,24 @@
-# NetBox Docker
+---
+title: Netbox Docker
+description: Guia de instalação e configuração do NetBox com Docker e seus plugins.
+---
+
+**Sumário**
+
+- [📋 Pré-requisitos](#-pré-requisitos)
+- [⚙️ Instalação](#️-instalação)
+- [🖥️ Como Usar](#️-como-usar)
+  - [Credenciais de Primeiro Acesso](#credenciais-de-primeiro-acesso)
+- [📁 Estrutura do Projeto](#-estrutura-do-projeto)
+- [📚 Documentação Adicional](#-documentação-adicional)
+- [🛠️ Tecnologias Utilizadas](#️-tecnologias-utilizadas)
+- [Referencias](#referencias)
+
+---
 
 Este projeto facilita a instalação do NetBox utilizando Docker e seus plugins (opcional).
 
-## 📋 Pré-requisitos
+# 📋 Pré-requisitos
 
 Esse ambiente foi testado com os requisitos abaixo:
 
@@ -11,7 +27,7 @@ Esse ambiente foi testado com os requisitos abaixo:
 - **Processamento:** 2 CPUs (vCPUs).
 - **Acesso:** Usuário com privilégios de `sudo`.
 
-## ⚙️ Instalação
+# ⚙️ Instalação
 
 O processo é automatizado através de um script de instalação. Siga os passos abaixo:
 
@@ -29,20 +45,20 @@ O processo é automatizado através de um script de instalação. Siga os passos
 
 O script irá instalar o Docker, baixar as imagens e configurar o NetBox com Docker como um serviço automático do sistema (`systemd`).
 
-## 🖥️ Como Usar
+# 🖥️ Como Usar
 
 Após o término da instalação, o NetBox estará disponível em:
 
 - **URL:** `http://<IP-DO-SEU-SERVIDOR>:8000`
 
-### Credenciais de Primeiro Acesso
+## Credenciais de Primeiro Acesso
 
 - **Usuário:** `admin`
 - **Senha:** `Admin@1234567890`
 
 > ⚠️ **IMPORTANTE:** Por segurança, altere a senha do usuário `admin` imediatamente após o primeiro login.
 
-## 📁 Estrutura do Projeto
+# 📁 Estrutura do Projeto
 
 |- docs/: Documentação detalhada sobre procedimentos específicos.
 |-- plugins/: Documentação sobre plugins do netbox.
@@ -54,13 +70,15 @@ Após o término da instalação, o NetBox estará disponível em:
 |-- netbox-slurpit/: Diretório com os arquivos para o plugin do slurpit.
 |- install.sh: Script que automatiza toda a configuração inicial.
 
-## 📚 Documentação Adicional
+# 📚 Documentação Adicional
 
 Para demais guias, consulte os arquivos na pasta [`docs/`](./docs/).
 
 - [diode](./docs/plugins/diode-install.md): Instruções para instalação do plugin `diode`
+- [terraform](./integrações/terraform/README.md)
+- [pyats](./integrações/pyats+netbox/README.md)
 
-## 🛠️ Tecnologias Utilizadas
+# 🛠️ Tecnologias Utilizadas
 
 - **NetBox (v4.5.8-4.0.2):**.
 - **Docker & Docker Compose:** Para facilidade de execução.
@@ -68,6 +86,6 @@ Para demais guias, consulte os arquivos na pasta [`docs/`](./docs/).
 - **Redis:** Para cache e gerenciamento de tarefas em segundo plano.
 - **Ubuntu 22.04:** SO utilizado.
 
-## Referencias
+# Referencias
 
 - [netbox-docker-wiki](https://github.com/netbox-community/netbox-docker/wiki/)
