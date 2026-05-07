@@ -9,7 +9,35 @@ export DEBIAN_FRONTEND=noninteractive
 BASE_DIR="/opt/netbox-docker"
 NETBOX_DIR="${BASE_DIR}/netbox"
 OVERRIDE_FILE="${BASE_DIR}/netbox-custom/netbox/docker-compose.override.yml"
-NETBOX_PORT=8000
+ENV_FILE="${BASE_DIR}/.env"
+ENV_EXAMPLE="${BASE_DIR}/.env.example"
+
+# ==============================
+# CARREGAR VARIÁVEIS DO .env
+# ==============================
+if [ -f "${ENV_FILE}" ]; then
+  echo "Carregando variáveis do .env..."
+  set -a
+  source "${ENV_FILE}"
+  set +a
+else
+  if [ -f "${ENV_EXAMPLE}" ]; then
+    echo "Arquivo .env não encontrado. Criando a partir de .env.example..."
+    cp "${ENV_EXAMPLE}" "${ENV_FILE}"
+    set -a
+    source "${ENV_FILE}"
+    set +a
+    echo "✅ Arquivo .env criado! Você pode editá-lo antes de executar novamente."
+    echo "   Edite: nano ${ENV_FILE}"
+    echo "   Depois execute novamente: sudo ./install.sh"
+    exit 0
+  else
+    echo "⚠️  Arquivo .env.example não encontrado. Usando valores padrão."
+  fi
+fi
+
+# Definir variáveis com fallback
+NETBOX_PORT="${NETBOX_PORT:-8000}"
 IP_ADDR=$(hostname -I | awk '{print $1}')
 
 # ==============================
@@ -24,7 +52,7 @@ fi
 # INSTALL DEPENDENCIES
 # ==============================
 apt-get update -y
-apt-get install -y ca-certificates curl git
+apt-get install -y ca-certificates curl git net-tools
 
 # ==============================
 # TIMEZONE SAO PAULO CONFIG AND NTP
@@ -32,6 +60,17 @@ apt-get install -y ca-certificates curl git
 timedatectl set-timezone America/Sao_Paulo
 timedatectl set-ntp true
 systemctl restart systemd-timesyncd
+
+# ==============================
+# VERIFICAR PORTA
+# ==============================
+echo "Verificando se a porta ${NETBOX_PORT} está disponível..."
+if netstat -tuln | grep -q ":${NETBOX_PORT} "; then
+  echo "❌ ERRO: Porta ${NETBOX_PORT} já está em uso!"
+  echo "   Altere a variável NETBOX_PORT no arquivo .env"
+  exit 1
+fi
+echo "✅ Porta ${NETBOX_PORT} disponível."
 
 # ==============================
 # INIT SUBMODULE
@@ -83,20 +122,34 @@ echo "Aplicando override..."
 cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
 
 echo "Baixando imagens..."
-docker compose pull
+docker compose --env-file "${ENV_FILE}" pull
 
 echo "Subindo containers..."
-docker compose up -d
+docker compose --env-file "${ENV_FILE}" up -d
 
 # ==============================
-# WAIT FOR NETBOX
+# WAIT FOR NETBOX (MELHORADO)
 # ==============================
 echo "Aguardando NetBox iniciar..."
+echo "⏳ Isso pode levar até 10 minutos na primeira inicialização (banco de dados)..."
 
-until curl -s http://localhost:${NETBOX_PORT} >/dev/null; do
-  echo "NetBox ainda não disponível..."
-  sleep 5
+ELAPSED=0
+ until curl -s -o /dev/null -w "%{http_code}" http://localhost:${NETBOX_PORT} | grep -qE "200|302"; do
+  printf "NetBox ainda não disponível... %ds elapsed\r" "$ELAPSED"
+  sleep 10
+  ELAPSED=$((ELAPSED + 10))
+  
+  # Timeout de 15 minutos
+  if [ $ELAPSED -ge 900 ]; then
+    echo ""
+    echo "❌ TIMEOUT: NetBox não iniciou em 15 minutos."
+    echo "   Verifique os logs: cd ${NETBOX_DIR} && docker compose logs -f"
+    exit 1
+  fi
 done
+
+echo ""
+echo "✅ NetBox respondeu após ${ELAPSED}s!"
 
 # ==============================
 # SYSTEMD SERVICE
@@ -110,8 +163,8 @@ After=docker.service
 [Service]
 Type=oneshot
 WorkingDirectory=${NETBOX_DIR}
-ExecStart=/usr/bin/docker compose up -d
-ExecStop=/usr/bin/docker compose down
+ExecStart=/usr/bin/docker compose --env-file ${ENV_FILE} up -d
+ExecStop=/usr/bin/docker compose --env-file ${ENV_FILE} down
 RemainAfterExit=yes
 
 [Install]
@@ -131,5 +184,13 @@ echo ""
 echo "Docker: $(docker --version)"
 echo ""
 echo "Acesse: http://${IP_ADDR}:${NETBOX_PORT}"
+echo ""
+echo "Credenciais (configure no arquivo .env):"
+echo "  Usuário: ${SUPERUSER_NAME:-admin}"
+echo "  Senha: ${SUPERUSER_PASSWORD:-Admin@1234567890}"
+echo ""
+echo "Para alterar configurações:"
+echo "  1. Edite: nano ${ENV_FILE}"
+echo "  2. Reinicie: systemctl restart netbox"
 echo ""
 echo "=================================================="

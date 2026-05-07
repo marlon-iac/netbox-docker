@@ -1,4 +1,26 @@
+# Arquivos de ambiente (não versionar credenciais!)
+.env
+
+# Terraform
+.terraform
+*.tfstate
+*.tfstate.backup
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# Logs
+*.log
+
+# Archivos de prompt do Hermes
 .prompt*
 
-# terraform
-.terraform
+# Sistema
+.DS_Store
+Thumbs.db

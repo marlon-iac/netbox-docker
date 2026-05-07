@@ -1,18 +1,18 @@
 services:
 
   netbox:
-    image: netboxcommunity/netbox:v4.5.8-4.0.2
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.5.8-4.0.2}
     environment:
-      SUPERUSER_NAME: admin
-      SUPERUSER_EMAIL: admin@example.com
-      SUPERUSER_PASSWORD: Admin@1234567890
-      SKIP_SUPERUSER: "false"  # Garante a criação (padrão é false)
+      SUPERUSER_NAME: ${SUPERUSER_NAME:-admin}
+      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL:-admin@example.com}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD:-Admin@1234567890}
+      SKIP_SUPERUSER: "${SKIP_SUPERUSER:-false}"
       # O NetBox e o Django utilizam esta variável para
       # formatar datas e horas na interface web e no banco de dados.
-      TIME_ZONE: "America/Sao_Paulo"
+      TIME_ZONE: "${TIME_ZONE:-America/Sao_Paulo}"
     restart: unless-stopped
     ports:
-      - "8000:8080"
+      - "${NETBOX_PORT:-8000}:8080"
     healthcheck:
       start_period: 400s
       timeout: 30s
@@ -20,14 +20,22 @@ services:
       retries: 5
 
   netbox-worker:
-    image: netboxcommunity/netbox:v4.5.8-4.0.2
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.5.8-4.0.2}
     restart: unless-stopped
 
   postgres:
     restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-netbox}
+      POSTGRES_USER: ${POSTGRES_USER:-netbox}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netbox}
 
   redis:
     restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
 
   redis-cache:
     restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
