@@ -9,9 +9,9 @@ set -euo pipefail
 generate_password() {
   local password=""
   # Django exige pelo menos 50 caracteres para SECRET_KEY
-  # Caracteres seguros para .env (sem (){}|;:,.<>? que quebram o source do bash)
+  # Apenas A-Za-z0-9 (evita problemas com tr ranges e source .env)
   while [ ${#password} -lt 60 ]; do
-    char=$(</dev/urandom tr -dc 'A-Za-z0-9!@#$%^&*_-+=~' | head -c 1)
+    char=$(</dev/urandom tr -dc 'A-Za-z0-9' | head -c 1)
     password="${password}${char}"
   done
   echo "$password"
