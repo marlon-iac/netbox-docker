@@ -9,33 +9,7 @@ export DEBIAN_FRONTEND=noninteractive
 BASE_DIR="/opt/netbox-docker"
 NETBOX_DIR="${BASE_DIR}/netbox"
 OVERRIDE_FILE="${BASE_DIR}/netbox-custom/netbox/docker-compose.override.yml"
-ENV_EXAMPLE="${BASE_DIR}/.env.example"
 ENV_FILE="${BASE_DIR}/.env"
-
-# ==============================
-# CARREGAR VARIÁVEIS DO .env (RAIZ DO PROJETO)
-# ==============================
-if [ -f "${ENV_FILE}" ]; then
-  echo "Carregando variáveis do .env..."
-  set -a
-  source "${ENV_FILE}"
-  set +a
-else
-  if [ -f "${ENV_EXAMPLE}" ]; then
-    echo "Arquivo .env não encontrado. Criando a partir de .env.example..."
-    cp "${ENV_EXAMPLE}" "${ENV_FILE}"
-    set -a
-    source "${ENV_FILE}"
-    set +a
-    echo "✅ Arquivo .env criado na raiz do projeto!"
-    echo "   Edite: nano ${ENV_FILE}"
-    echo "   Dica: Gere a SECRET_KEY com: docker compose --env-file ${ENV_FILE} run netbox python3 /opt/netbox/netbox/generate_secret_key.py"
-    echo "   Depois execute novamente: sudo ./install.sh"
-    exit 0
-  else
-    echo "⚠️  Arquivo .env.example não encontrado na raiz."
-  fi
-fi
 
 # Definir variáveis com fallback (agora vêm do .env externo)
 NETBOX_PORT="${NETBOX_PORT}"
@@ -117,16 +91,13 @@ fi
 systemctl enable --now docker
 
 # ==============================
-# DEPLOY NETBOX (Simplified for Lab)
+# DEPLOY NETBOX
 # ==============================
 cd "${NETBOX_DIR}"
 
-# CRITICAL: Clean Docker volumes before starting (prevents PostgreSQL password mismatch)
-echo "Limpando volumes antigos (docker compose down -v)..."
-docker compose --env-file "${ENV_FILE}" down -v 2>/dev/null || true
-
 echo "Aplicando override..."
 cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
+cp -f "${ENV_FILE}" .env
 
 echo "Baixando imagens..."
 docker compose pull
@@ -144,7 +115,7 @@ until docker ps --filter "name=netbox" --filter "health=healthy" --format "{{.Na
   attempt=$((attempt + 1))
   if [ $attempt -ge $max_attempts ]; then
     echo "Erro: NetBox não ficou healthy após 5 minutos"
-    echo "Verifique os logs: docker compose --env-file ${ENV_FILE} logs netbox"
+    echo "Verifique os logs: docker compose logs netbox"
     exit 1
   fi
   echo "NetBox ainda não está healthy... (tentativa $attempt/$max_attempts)"
@@ -185,11 +156,8 @@ echo "Docker: $(docker --version)"
 echo ""
 echo "Acesse: http://${IP_ADDR}:${NETBOX_PORT}"
 echo ""
-echo "Arquivos de configuração:"
-echo "  - ${ENV_FILE} (raiz do projeto - .env)"
-echo "  - ${NETBOX_DIR}/docker-compose.override.yml"
 echo ""
-echo "Credenciais (configure no arquivo .env):"
+echo "Credenciais (configuradas no arquivo .env):"
 echo "  - Usuário: ${SUPERUSER_NAME}"
 echo "  - Senha: ${SUPERUSER_PASSWORD}"
 echo ""
