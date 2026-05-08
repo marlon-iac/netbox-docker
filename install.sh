@@ -162,7 +162,7 @@ systemctl enable netbox
 # INFO FINAL
 # ==============================
 echo "=================================================="
-echo "✅ NetBox instalado com sucesso (configuração simplificada para laboratório)!"
+echo "✅ NetBox instalado com sucesso"
 echo "=================================================="
 echo ""
 echo "Docker: $(docker --version)"
