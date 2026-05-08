@@ -3,10 +3,10 @@ services:
   netbox:
     image: netboxcommunity/netbox:v4.5.8-4.0.2
     env_file:
-      - ./netbox-custom.env  # Arquivo com variáveis externas (copiado de .env.example)
+      - ../.env  # Arquivo com variáveis externas na RAIZ do projeto (/opt/netbox-docker/.env)
     restart: unless-stopped
     ports:
-      - "8000:8080"
+      - "${NETBOX_PORT:-8000}:8080"
     healthcheck:
       start_period: 500s
       timeout: 30s

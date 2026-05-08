@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eou pipefail
+set -euo pipefail
 
 # ==============================
 # CONFIG
@@ -9,9 +9,36 @@ export DEBIAN_FRONTEND=noninteractive
 BASE_DIR="/opt/netbox-docker"
 NETBOX_DIR="${BASE_DIR}/netbox"
 OVERRIDE_FILE="${BASE_DIR}/netbox-custom/netbox/docker-compose.override.yml"
-ENV_EXAMPLE="${BASE_DIR}/netbox-custom/netbox/.env.example"
-ENV_FILE="${NETBOX_DIR}/netbox-custom.env"
-NETBOX_PORT=8000
+ENV_EXAMPLE="${BASE_DIR}/.env.example"
+ENV_FILE="${BASE_DIR}/.env"
+
+# ==============================
+# CARREGAR VARIÁVEIS DO .env (RAIZ DO PROJETO)
+# ==============================
+if [ -f "${ENV_FILE}" ]; then
+  echo "Carregando variáveis do .env..."
+  set -a
+  source "${ENV_FILE}"
+  set +a
+else
+  if [ -f "${ENV_EXAMPLE}" ]; then
+    echo "Arquivo .env não encontrado. Criando a partir de .env.example..."
+    cp "${ENV_EXAMPLE}" "${ENV_FILE}"
+    set -a
+    source "${ENV_FILE}"
+    set +a
+    echo "✅ Arquivo .env criado na raiz do projeto!"
+    echo "   Edite: nano ${ENV_FILE}"
+    echo "   Dica: Gere a SECRET_KEY com: docker compose run netbox python3 /opt/netbox/netbox/generate_secret_key.py"
+    echo "   Depois execute novamente: sudo ./install.sh"
+    exit 0
+  else
+    echo "⚠️  Arquivo .env.example não encontrado na raiz."
+  fi
+fi
+
+# Definir variáveis com fallback (agora vêm do .env externo)
+NETBOX_PORT="${NETBOX_PORT:-8000}"
 IP_ADDR=$(hostname -I | awk '{print $1}')
 
 # ==============================
@@ -34,6 +61,17 @@ apt-get install -y ca-certificates curl git python3
 timedatectl set-timezone America/Sao_Paulo
 timedatectl set-ntp true
 systemctl restart systemd-timesyncd
+
+# ==============================
+# VERIFICAR PORTA (do .env)
+# ==============================
+echo "Verificando se a porta ${NETBOX_PORT} está disponível..."
+if netstat -tuln | grep -q ":${NETBOX_PORT} "; then
+  echo "❌ ERRO: Porta ${NETBOX_PORT} já está em uso!"
+  echo "   Altere a variável NETBOX_PORT no arquivo .env"
+  exit 1
+fi
+echo "✅ Porta ${NETBOX_PORT} disponível."
 
 # ==============================
 # INIT SUBMODULE
@@ -90,23 +128,14 @@ docker compose down -v 2>/dev/null || true
 echo "Aplicando override..."
 cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
 
-# Copy .env.example to netbox-custom.env if it doesn't exist
-if [ ! -f "${ENV_FILE}" ] && [ -f "${ENV_EXAMPLE}" ]; then
-  echo "Copiando .env.example para netbox-custom.env..."
-  cp "${ENV_EXAMPLE}" "${ENV_FILE}"
-fi
-
-# Generate SECRET_KEY using official method (NOT tr/sed!)
-if [ -f "${ENV_FILE}" ] && ! grep -q "SECRET_KEY=gerar_com_python" "${ENV_FILE}" 2>/dev/null; then
-  echo "netbox-custom.env já possui SECRET_KEY configurado."
-else
-  echo "Gerando SECRET_KEY oficial (docker compose run netbox python3 /opt/netbox/netbox/generate_secret_key.py)..."
-  NEW_KEY=$(docker compose run --rm netbox python3 /opt/netbox/netbox/generate_secret_key.py 2>/dev/null | tr -d '\n')
-  if [ -n "$NEW_KEY" ]; then
-    sed -i "s|SECRET_KEY=gerar_com_python|SECRET_KEY=$NEW_KEY|g" "${ENV_FILE}"
-    echo "SECRET_KEY gerada com sucesso!"
-  else
-    echo "Aviso: Não foi possível gerar SECRET_KEY automaticamente. Configure manualmente no netbox-custom.env"
+# Validar se SECRET_KEY está configurada (NÃO geramos mais automaticamente)
+if [ -f "${ENV_FILE}" ]; then
+  SECRET_KEY_VAL=$(grep "^SECRET_KEY=" "${ENV_FILE}" | cut -d'=' -f2-)
+  if [ -z "$SECRET_KEY_VAL" ]; then
+    echo "⚠️  AVISO: SECRET_KEY não está configurada no .env!"
+    echo "   Gere uma com: cd ${NETBOX_DIR}"
+    echo "   docker compose --env-file ${ENV_FILE} run netbox python3 /opt/netbox/netbox/generate_secret_key.py"
+    echo "   Depois copie a chave para o arquivo .env"
   fi
 fi
 
@@ -168,13 +197,12 @@ echo ""
 echo "Acesse: http://${IP_ADDR}:${NETBOX_PORT}"
 echo ""
 echo "Arquivos de configuração:"
-echo "  - ${ENV_FILE} (copiado de ${ENV_EXAMPLE})"
+echo "  - ${ENV_FILE} (raiz do projeto - .env)"
 echo "  - ${NETBOX_DIR}/docker-compose.override.yml"
 echo ""
-echo "Credenciais padrão:"
-echo "  - Usuário: admin"
-echo "  - Senha: admin"
-echo "  (definidas em SUPERUSER_* no netbox-custom.env)"
+echo "Credenciais (configure no arquivo .env):"
+echo "  - Usuário: ${SUPERUSER_NAME:-admin}"
+echo "  - Senha: ${SUPERUSER_PASSWORD:-admin}"
 echo ""
 echo "Para logs: cd ${NETBOX_DIR} && docker compose logs -f netbox"
 echo "=================================================="
