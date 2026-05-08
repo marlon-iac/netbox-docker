@@ -8,7 +8,6 @@ description: Guia de instalação e configuração do NetBox com Docker e seus p
 - [📋 Pré-requisitos](#-pré-requisitos)
 - [⚙️ Instalação](#️-instalação)
 - [🖥️ Como Usar](#️-como-usar)
-  - [Credenciais de Primeiro Acesso](#credenciais-de-primeiro-acesso)
 - [📁 Estrutura do Projeto](#-estrutura-do-projeto)
 - [📚 Documentação Adicional](#-documentação-adicional)
 - [🛠️ Tecnologias Utilizadas](#️-tecnologias-utilizadas)
@@ -41,9 +40,10 @@ O processo é automatizado através de um script de instalação. Siga os passos
 
 Crie o arquivo .env a partir do .env.example e edite-o conforme necessário
 
-```bash
-cp /opt/netbox-docker/.env.example /opt/netbox-docker/.env
-```
+  ```bash
+  cp /opt/netbox-docker/.env.example /opt/netbox-docker/.env
+  nano /opt/netbox-docker/.env
+  ```
 
 3. **Execute o script de instalação:**
 
@@ -59,10 +59,7 @@ Após o término da instalação, o NetBox estará disponível em:
 
 - **URL:** `http://<IP-DO-SEU-SERVIDOR>:8000`
 
-## Credenciais de Primeiro Acesso
-
-- **Usuário:** `admin`
-- **Senha:** `Admin@1234567890`
+As credenciais de primeiro acesso foram as definidas no arquivo `/opt/netbox-docker/.env`
 
 > ⚠️ **IMPORTANTE:** Por segurança, altere a senha do usuário `admin` imediatamente após o primeiro login.
 
