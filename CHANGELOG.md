@@ -8,34 +8,26 @@ e este projeto segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ## [Não Lançado]
 
 ### ✨ Adicionado
-- Suporte a arquivo `.env` para customização (Issue #1)
-- Seção de Troubleshooting no README.md
-- Arquivo `CONTRIBUTING.md` com guia de contribuição
-- Arquivo `LICENSE` (MIT)
+- Suporte a arquivo `.env` global na raiz do projeto (Issue #1)
 - Badges no README (Docker Pulls, Issues, License, Stars)
-- Este CHANGELOG.md
+- Este CHANGELOG.md (padrão Keep a Changelog)
+- Documentação em português (pt-BR)
 
 ### 🔄 Alterado
-- `docker-compose.override.yml` refatorado para usar variáveis `${VAR}`
-- `install.sh` melhorado com:
-  - Carregamento automático do `.env`
-  - Validação de porta antes de subir
-  - Healthcheck com verificação HTTP e timeout de 15min
-  - Feedback visual com tempo decorrido
-- `README.md` reescrito com:
-  - Seção de configuração `.env`
-  - Seção de Troubleshooting
-  - Tabelas para estrutura do projeto
-  - Foco em usuários leigos
+- `docker-compose.override.yml`: uso de `environment` com `${VAR}` explícitas
+  (evita sobrescrever variáveis do projeto oficial netbox-docker)
+- `install.sh`:
+  - Carregamento do `.env` via `set -a` e `source` para variáveis de shell
+  - Remoção da geração automática de `SECRET_KEY` (agora via comando oficial Python)
+  - Validação de porta via variável `${NETBOX_PORT}` do .env
+  - Timeout de espera do NetBox reduzido para 5 minutos (30 tentativas)
 
 ### 🐛 Corrigido
 - `.gitignore` atualizado para ignorar `.env` (segurança)
-
-### ⚠️ Depreciado
-- (Nenhum)
+- `install.sh`: Correção na passagem de variáveis para o Systemd service (`--env-file`)
 
 ### ❌ Removido
-- (Nenhum)
+- Geração automática de senhas no `install.sh` (função `generate_password` removida)
 
 ### 🔐 Segurança
 - Credenciais não são mais hardcoded (usam `.env`)
