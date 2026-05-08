@@ -37,7 +37,15 @@ O processo é automatizado através de um script de instalação. Siga os passos
     sudo git clone https://github.com/marlon-iac/netbox-docker.git /opt/netbox-docker
     ```
 
-2. **Execute o script de instalação:**
+2. **Ajustes de variável:**
+
+Crie o arquivo .env a partir do .env.example e edite-o conforme necessário
+
+```bash
+cp /opt/netbox-docker/.env.example /opt/netbox-docker/.env
+```
+
+3. **Execute o script de instalação:**
 
     ```bash
     cd /opt/netbox-docker && sudo ./install.sh
