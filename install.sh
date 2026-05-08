@@ -29,7 +29,7 @@ else
     set +a
     echo "✅ Arquivo .env criado na raiz do projeto!"
     echo "   Edite: nano ${ENV_FILE}"
-    echo "   Dica: Gere a SECRET_KEY com: docker compose run netbox python3 /opt/netbox/netbox/generate_secret_key.py"
+    echo "   Dica: Gere a SECRET_KEY com: docker compose --env-file ${ENV_FILE} run netbox python3 /opt/netbox/netbox/generate_secret_key.py"
     echo "   Depois execute novamente: sudo ./install.sh"
     exit 0
   else
@@ -123,7 +123,7 @@ cd "${NETBOX_DIR}"
 
 # CRITICAL: Clean Docker volumes before starting (prevents PostgreSQL password mismatch)
 echo "Limpando volumes antigos (docker compose down -v)..."
-docker compose down -v 2>/dev/null || true
+docker compose --env-file "${ENV_FILE}" down -v 2>/dev/null || true
 
 echo "Aplicando override..."
 cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
@@ -140,10 +140,10 @@ if [ -f "${ENV_FILE}" ]; then
 fi
 
 echo "Baixando imagens..."
-docker compose pull
+docker compose --env-file "${ENV_FILE}" pull
 
 echo "Subindo containers..."
-docker compose up -d
+docker compose --env-file "${ENV_FILE}" up -d
 
 # ==============================
 # WAIT FOR NETBOX
@@ -155,7 +155,7 @@ until docker ps --filter "name=netbox" --filter "health=healthy" --format "{{.Na
   attempt=$((attempt + 1))
   if [ $attempt -ge $max_attempts ]; then
     echo "Erro: NetBox não ficou healthy após 5 minutos"
-    echo "Verifique os logs: docker compose logs netbox"
+    echo "Verifique os logs: docker compose --env-file ${ENV_FILE} logs netbox"
     exit 1
   fi
   echo "NetBox ainda não está healthy... (tentativa $attempt/$max_attempts)"
@@ -174,8 +174,8 @@ After=docker.service
 [Service]
 Type=oneshot
 WorkingDirectory=${NETBOX_DIR}
-ExecStart=/usr/bin/docker compose up -d
-ExecStop=/usr/bin/docker compose down
+ExecStart=/usr/bin/docker compose --env-file ${ENV_FILE} up -d
+ExecStop=/usr/bin/docker compose --env-file ${ENV_FILE} down
 RemainAfterExit=yes
 
 [Install]
@@ -204,5 +204,5 @@ echo "Credenciais (configure no arquivo .env):"
 echo "  - Usuário: ${SUPERUSER_NAME:-admin}"
 echo "  - Senha: ${SUPERUSER_PASSWORD:-admin}"
 echo ""
-echo "Para logs: cd ${NETBOX_DIR} && docker compose logs -f netbox"
+echo "Para logs: cd ${NETBOX_DIR} && docker compose --env-file ${ENV_FILE} logs -f netbox"
 echo "=================================================="
