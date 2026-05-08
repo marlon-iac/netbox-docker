@@ -197,6 +197,8 @@ cp /opt/netbox-docker/netbox-custom/netbox-diode/docker-compose.override.yml /op
 
 *obs: caso já possua um `docker-compose.override.yml` de instalação do netbox-docker, apenas acrescente as linhas abaixo para instalação dos plugins ao invés de copiar o arquivo:*
 
+**Atenção:** O arquivo `docker-compose.override.yml` completo em `netbox-custom/netbox-diode/` utiliza variáveis de ambiente (ex: `${SUPERUSER_NAME}`, `${NETBOX_PORT}`). Certifique-se de que o arquivo `.env` esteja presente na raiz do projeto (`/opt/netbox-docker/.env`) para que essas variáveis sejam resolvidas.
+
 ```yaml
 services:
   netbox:
@@ -204,6 +206,14 @@ services:
       context: .
       dockerfile: Dockerfile-Plugins
     image: netbox-with-diode:latest
+    environment:
+      SUPERUSER_NAME: ${SUPERUSER_NAME:-admin}
+      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL:-admin@example.com}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD:-Admin@1234567890}
+      SKIP_SUPERUSER: "${SKIP_SUPERUSER:-false}"
+      TIME_ZONE: "${TIME_ZONE:-America/Sao_Paulo}"
+    ports:
+      - "${NETBOX_PORT:-8000}:8080"
   netbox-worker:
     image: netbox-with-diode:latest
     build:
@@ -224,22 +234,22 @@ cp /opt/netbox-docker/netbox-custom/netbox-diode/configuration/plugins.py /opt/n
 nano /opt/netbox-docker/netbox/configuration/plugins.py
 ```
 
-**Exemplo:**
+**Exemplo (substitua pelas credenciais reais obtidas no passo 3 da instalação do Diode Server):**
 
 ```python
 # restante omitido
 PLUGINS_CONFIG = {
     "netbox_diode_plugin": {
-        "diode_target_override": "grpc://192.168.249.175:8080/diode",
+        "diode_target_override": "grpc://<IP_DO_SERVIDOR>:8080/diode",
         "diode_username": "diode",
         "client_id": "netbox-to-diode",
-        "netbox_to_diode_client_secret": "veVUxfl9reMcOW7gBkNRaT7KoB+Pt72vIadI14bpN4="
+        "netbox_to_diode_client_secret": "<SEU_CLIENT_SECRET_AQUI>"
     },
 }
 # restante omitido
 ```
 
-*obs: diode_targe_override é o grpc do diode, não do netbox*
+*obs: diode_target_override é o grpc do diode, não do netbox*
 
 3. Reconstrua e inicie os containers do netbox-docker
 
@@ -316,6 +326,10 @@ Para validar, verifique alguns logs:
 ---
 
 # Troubleshooting
+
+- **Containers diode-auth-bootstrap ou hydra-migrate em loop (Restarting):**
+  - **Comportamento Normal:** Na primeira instalação, o `diode-auth-bootstrap` pode ficar em loop de restart tentando conectar ao `hydra` na porta 4445. O mesmo pode ocorrer com o `hydra-migrate`. 
+  - **Solução:** Aguarde alguns minutos. O bootstrap tenta reconectar automaticamente. Quando o serviço `hydra` estiver totalmente healthy, o bootstrap terminará sua execução e criará os clients necessários (ex: `netbox-to-diode`). Verifique os logs com `docker compose logs -f diode-auth-bootstrap`.
 
 - **Verificar status de todos os containers**
 
