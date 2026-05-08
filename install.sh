@@ -38,7 +38,7 @@ else
 fi
 
 # Definir variáveis com fallback (agora vêm do .env externo)
-NETBOX_PORT="${NETBOX_PORT:-8000}"
+NETBOX_PORT="${NETBOX_PORT}"
 IP_ADDR=$(hostname -I | awk '{print $1}')
 
 # ==============================
@@ -58,7 +58,7 @@ apt-get install -y ca-certificates curl git python3
 # ==============================
 # TIMEZONE SAO PAULO CONFIG AND NTP
 # ==============================
-timedatectl set-timezone America/Sao_Paulo
+timedatectl set-timezone "$TIME_ZONE"
 timedatectl set-ntp true
 systemctl restart systemd-timesyncd
 
@@ -128,22 +128,11 @@ docker compose --env-file "${ENV_FILE}" down -v 2>/dev/null || true
 echo "Aplicando override..."
 cp -f "${OVERRIDE_FILE}" docker-compose.override.yml
 
-# Validar se SECRET_KEY está configurada (NÃO geramos mais automaticamente)
-if [ -f "${ENV_FILE}" ]; then
-  SECRET_KEY_VAL=$(grep "^SECRET_KEY=" "${ENV_FILE}" | cut -d'=' -f2-)
-  if [ -z "$SECRET_KEY_VAL" ]; then
-    echo "⚠️  AVISO: SECRET_KEY não está configurada no .env!"
-    echo "   Gere uma com: cd ${NETBOX_DIR}"
-    echo "   docker compose --env-file ${ENV_FILE} run netbox python3 /opt/netbox/netbox/generate_secret_key.py"
-    echo "   Depois copie a chave para o arquivo .env"
-  fi
-fi
-
 echo "Baixando imagens..."
-docker compose --env-file "${ENV_FILE}" pull
+docker compose pull
 
 echo "Subindo containers..."
-docker compose --env-file "${ENV_FILE}" up -d
+docker compose up -d
 
 # ==============================
 # WAIT FOR NETBOX
@@ -174,8 +163,8 @@ After=docker.service
 [Service]
 Type=oneshot
 WorkingDirectory=${NETBOX_DIR}
-ExecStart=/usr/bin/docker compose --env-file ${ENV_FILE} up -d
-ExecStop=/usr/bin/docker compose --env-file ${ENV_FILE} down
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
 RemainAfterExit=yes
 
 [Install]
@@ -201,8 +190,8 @@ echo "  - ${ENV_FILE} (raiz do projeto - .env)"
 echo "  - ${NETBOX_DIR}/docker-compose.override.yml"
 echo ""
 echo "Credenciais (configure no arquivo .env):"
-echo "  - Usuário: ${SUPERUSER_NAME:-admin}"
-echo "  - Senha: ${SUPERUSER_PASSWORD:-admin}"
+echo "  - Usuário: ${SUPERUSER_NAME}"
+echo "  - Senha: ${SUPERUSER_PASSWORD}"
 echo ""
-echo "Para logs: cd ${NETBOX_DIR} && docker compose --env-file ${ENV_FILE} logs -f netbox"
+echo "Para logs: cd ${NETBOX_DIR} && docker compose logs -f netbox"
 echo "=================================================="
