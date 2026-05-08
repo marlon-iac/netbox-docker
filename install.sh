@@ -11,8 +11,21 @@ NETBOX_DIR="${BASE_DIR}/netbox"
 OVERRIDE_FILE="${BASE_DIR}/netbox-custom/netbox/docker-compose.override.yml"
 ENV_FILE="${BASE_DIR}/.env"
 
-# Definir variáveis com fallback (agora vêm do .env externo)
-NETBOX_PORT="${NETBOX_PORT}"
+# ==============================
+# CARREGAR VARIÁVEIS DO .env (RAIZ DO PROJETO)
+# ==============================
+if [ -f "${ENV_FILE}" ]; then
+  echo "Carregando variáveis do .env..."
+  set -a  # Exporta automaticamente todas as variáveis lidas
+  source "${ENV_FILE}"
+  set +a  # Desativa exportação automática
+else
+  echo "ERRO: Arquivo .env não encontrado em ${ENV_FILE}"
+  echo "Crie o arquivo copiando o exemplo: cp ${BASE_DIR}/.env.example ${ENV_FILE}"
+  exit 1
+fi
+
+# Variáveis locais (agora populadas pelo source acima)
 IP_ADDR=$(hostname -I | awk '{print $1}')
 
 # ==============================
