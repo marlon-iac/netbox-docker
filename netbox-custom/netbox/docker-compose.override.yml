@@ -1,9 +1,25 @@
 services:
 
   netbox:
-    image: netboxcommunity/netbox:v4.5.8-4.0.2
-    env_file:
-      - ../.env  # Arquivo com variáveis externas na RAIZ do projeto (/opt/netbox-docker/.env)
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.5.8-4.0.2}
+    environment:
+      SUPERUSER_NAME: ${SUPERUSER_NAME:-admin}
+      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL:-admin@example.com}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD:-Admin@1234567890}
+      SKIP_SUPERUSER: "${SKIP_SUPERUSER:-false}"
+      TIME_ZONE: "${TIME_ZONE:-America/Sao_Paulo}"
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_NAME: ${DB_NAME:-netbox}
+      DB_USER: ${DB_USER:-netbox}
+      DB_PASSWORD: ${DB_PASSWORD:-netbox}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_DATABASE: ${REDIS_DATABASE:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
+      REDIS_CACHE_HOST: ${REDIS_CACHE_HOST:-redis-cache}
+      REDIS_CACHE_DATABASE: ${REDIS_CACHE_DATABASE:-1}
+      REDIS_CACHE_PASSWORD: ${REDIS_CACHE_PASSWORD:-redis}
+      SECRET_KEY: ${SECRET_KEY:-}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost 127.0.0.1 ::1}
     restart: unless-stopped
     ports:
       - "${NETBOX_PORT:-8000}:8080"
@@ -14,14 +30,35 @@ services:
       retries: 5
 
   netbox-worker:
-    image: netboxcommunity/netbox:v4.5.8-4.0.2
+    image: netboxcommunity/netbox:${NETBOX_VERSION:-v4.5.8-4.0.2}
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_NAME: ${DB_NAME:-netbox}
+      DB_USER: ${DB_USER:-netbox}
+      DB_PASSWORD: ${DB_PASSWORD:-netbox}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_DATABASE: ${REDIS_DATABASE:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
+      REDIS_CACHE_HOST: ${REDIS_CACHE_HOST:-redis-cache}
+      REDIS_CACHE_DATABASE: ${REDIS_CACHE_DATABASE:-1}
+      REDIS_CACHE_PASSWORD: ${REDIS_CACHE_PASSWORD:-redis}
+      SECRET_KEY: ${SECRET_KEY:-}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost 127.0.0.1 ::1}
     restart: unless-stopped
 
   postgres:
     restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-netbox}
+      POSTGRES_USER: ${POSTGRES_USER:-netbox}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-netbox}
 
   redis:
     restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis}
 
   redis-cache:
     restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_CACHE_PASSWORD:-redis}
