@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile-Plugins
       args:
         - NETBOX_VERSION=${NETBOX_VERSION}
-    image: netbox-with-diode:latest
+    image: netbox-with-diode:${NETBOX_VERSION}
     restart: unless-stopped
     pull_policy: never
     environment:
@@ -24,7 +24,6 @@ services:
       retries: 5
 
   netbox-worker:
-    image: netbox-with-diode:latest
     restart: unless-stopped
     pull_policy: never
 
