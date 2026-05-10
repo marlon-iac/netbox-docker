@@ -25,11 +25,6 @@ services:
 
   netbox-worker:
     image: netbox-with-diode:latest
-    build:
-      context: .
-      dockerfile: Dockerfile-Plugins
-      args:
-        - NETBOX_VERSION=${NETBOX_VERSION}
     restart: unless-stopped
     pull_policy: never
 
