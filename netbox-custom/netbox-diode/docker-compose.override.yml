@@ -5,18 +5,18 @@ services:
       context: .
       dockerfile: Dockerfile-Plugins
       args:
-        - NETBOX_VERSION=${NETBOX_VERSION:-v4.5.8-4.0.2}
+        - NETBOX_VERSION=${NETBOX_VERSION}
     image: netbox-with-diode:latest
     restart: unless-stopped
     pull_policy: never
     environment:
-      SUPERUSER_NAME: ${SUPERUSER_NAME:-admin}
-      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL:-admin@example.com}
-      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD:-Admin@1234567890}
-      SKIP_SUPERUSER: "${SKIP_SUPERUSER:-false}"
-      TIME_ZONE: "${TIME_ZONE:-America/Sao_Paulo}"
+      SUPERUSER_NAME: ${SUPERUSER_NAME}
+      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD}
+      SKIP_SUPERUSER: "${SKIP_SUPERUSER}"
+      TIME_ZONE: "${TIME_ZONE}"
     ports:
-      - "${NETBOX_PORT:-8000}:8080"
+      - "${NETBOX_PORT}:8080"
     healthcheck:
       start_period: 500s
       timeout: 30s
@@ -29,7 +29,7 @@ services:
       context: .
       dockerfile: Dockerfile-Plugins
       args:
-        - NETBOX_VERSION=${NETBOX_VERSION:-v4.5.8-4.0.2}
+        - NETBOX_VERSION=${NETBOX_VERSION}
     restart: unless-stopped
     pull_policy: never
 
