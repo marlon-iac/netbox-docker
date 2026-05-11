@@ -45,10 +45,10 @@ O processo é automatizado através de um script de instalação. Siga os passos
 
 Crie o arquivo .env a partir do .env.example e edite-o conforme necessário
 
-  ```bash
-  cp /opt/netbox-docker/.env.example /opt/netbox-docker/.env
-  nano /opt/netbox-docker/.env
-  ```
+    ```bash
+    cp /opt/netbox-docker/.env.example /opt/netbox-docker/.env
+    nano /opt/netbox-docker/.env
+    ```
 
 3. **Execute o script de instalação:**
 
