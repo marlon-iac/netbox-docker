@@ -195,31 +195,7 @@ cp /opt/netbox-docker/netbox-custom/netbox-diode/Dockerfile-Plugins /opt/netbox-
 cp /opt/netbox-docker/netbox-custom/netbox-diode/docker-compose.override.yml /opt/netbox-docker/netbox
 ```
 
-*obs: caso já possua um `docker-compose.override.yml` de instalação do netbox-docker, apenas acrescente as linhas abaixo para instalação dos plugins ao invés de copiar o arquivo:*
-
 **Atenção:** O arquivo `docker-compose.override.yml` completo em `netbox-custom/netbox-diode/` utiliza variáveis de ambiente (ex: `${SUPERUSER_NAME}`, `${NETBOX_PORT}`). Certifique-se de que o arquivo `.env` esteja presente na raiz do projeto (`/opt/netbox-docker/.env`) para que essas variáveis sejam resolvidas.
-
-```yaml
-services:
-  netbox:
-    build:
-      context: .
-      dockerfile: Dockerfile-Plugins
-    image: netbox-with-diode:latest
-    environment:
-      SUPERUSER_NAME: ${SUPERUSER_NAME:-admin}
-      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL:-admin@example.com}
-      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD:-Admin@1234567890}
-      SKIP_SUPERUSER: "${SKIP_SUPERUSER:-false}"
-      TIME_ZONE: "${TIME_ZONE:-America/Sao_Paulo}"
-    ports:
-      - "${NETBOX_PORT:-8000}:8080"
-  netbox-worker:
-    image: netbox-with-diode:latest
-    build:
-      context: .
-      dockerfile: Dockerfile-Plugins
-```
 
 2. Configuração do arquivo de plugin
 
