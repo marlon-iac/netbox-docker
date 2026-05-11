@@ -236,7 +236,7 @@ docker compose up -d
 docker images | grep netbox
 ```
 
-Ao executar o comando *docker images | grep netbox* uma nova imagem foi criada com o nome de `netbox-with-diode:latest`. Isso torna o plugin permanente.
+Ao executar o comando *docker images | grep netbox* uma nova imagem foi criada com o nome de `netbox-with-diode:<versao>`. Isso torna o plugin permanente.
 
 4. Validação
 
