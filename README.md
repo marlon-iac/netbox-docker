@@ -43,9 +43,8 @@ O processo é automatizado através de um script de instalação. Siga os passos
 
 2. **Ajustes de variável:**
 
-Crie o arquivo .env a partir do .env.example e edite-o conforme necessário
-
     ```bash
+    # Crie o arquivo .env a partir do .env.example e edite-o conforme necessário
     cp /opt/netbox-docker/.env.example /opt/netbox-docker/.env
     nano /opt/netbox-docker/.env
     ```
